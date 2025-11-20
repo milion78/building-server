@@ -74,32 +74,32 @@ public class AccessLogInterceptor implements HandlerInterceptor {
                 }
             }
             
-            // 构建请求日志
+            // 构建请求日志（使用单行格式，避免日志系统拆分）
             StringBuilder logBuilder = new StringBuilder();
-            logBuilder.append("\n========== Access Log Start ==========\n");
-            logBuilder.append("Time: ").append(dateFormat.format(new Date(startTime))).append("\n");
-            logBuilder.append("Method: ").append(request.getMethod()).append("\n");
-            logBuilder.append("URI: ").append(request.getRequestURI()).append("\n");
-            logBuilder.append("Query String: ").append(request.getQueryString() != null ? request.getQueryString() : "").append("\n");
+            logBuilder.append("========== Access Log Start ========== | ");
+            logBuilder.append("Time: ").append(dateFormat.format(new Date(startTime))).append(" | ");
+            logBuilder.append("Method: ").append(request.getMethod()).append(" | ");
+            logBuilder.append("URI: ").append(request.getRequestURI()).append(" | ");
+            logBuilder.append("Query String: ").append(request.getQueryString() != null ? request.getQueryString() : "").append(" | ");
             
             // 记录请求参数
             if (!requestParams.isEmpty()) {
                 try {
-                    logBuilder.append("Request Params: ").append(objectMapper.writeValueAsString(requestParams)).append("\n");
+                    logBuilder.append("Request Params: ").append(objectMapper.writeValueAsString(requestParams)).append(" | ");
                 } catch (Exception e) {
                     e.printStackTrace();
-                    logBuilder.append("Request Params: ").append(requestParams.toString()).append("\n");
+                    logBuilder.append("Request Params: ").append(requestParams.toString()).append(" | ");
                 }
             }
             
             // 记录请求体
             if (requestBody != null && !requestBody.isEmpty()) {
-                logBuilder.append("Request Body: ").append(requestBody).append("\n");
+                logBuilder.append("Request Body: ").append(requestBody).append(" | ");
             }
             
             // 记录请求头（可选，根据需要）
-            logBuilder.append("Content-Type: ").append(request.getContentType() != null ? request.getContentType() : "").append("\n");
-            logBuilder.append("Remote Addr: ").append(request.getRemoteAddr()).append("\n");
+            logBuilder.append("Content-Type: ").append(request.getContentType() != null ? request.getContentType() : "").append(" | ");
+            logBuilder.append("Remote Addr: ").append(request.getRemoteAddr());
             
             logger.info(logBuilder.toString());
             
@@ -123,9 +123,9 @@ public class AccessLogInterceptor implements HandlerInterceptor {
                 long endTime = System.currentTimeMillis();
                 long duration = endTime - startTime;
                 
-                // 构建响应日志
+                // 构建响应日志（使用单行格式，避免日志系统拆分）
                 StringBuilder logBuilder = new StringBuilder();
-                logBuilder.append("Response Status: ").append(response.getStatus()).append("\n");
+                logBuilder.append("Response Status: ").append(response.getStatus()).append(" | ");
                 
                 // 获取响应内容
                 ContentCachingResponseWrapper responseWrapper = responseWrapperThreadLocal.get();
@@ -135,9 +135,9 @@ public class AccessLogInterceptor implements HandlerInterceptor {
                         if (responseBody != null && !responseBody.isEmpty()) {
                             // 限制响应内容长度，避免日志过长
                             if (responseBody.length() > 2000) {
-                                logBuilder.append("Response Body: ").append(responseBody.substring(0, 2000)).append("... (truncated)\n");
+                                logBuilder.append("Response Body: ").append(responseBody.substring(0, 2000)).append("... (truncated) | ");
                             } else {
-                                logBuilder.append("Response Body: ").append(responseBody).append("\n");
+                                logBuilder.append("Response Body: ").append(responseBody).append(" | ");
                             }
                         }
                     } catch (Exception e) {
@@ -145,15 +145,15 @@ public class AccessLogInterceptor implements HandlerInterceptor {
                     }
                 }
                 
-                logBuilder.append("Duration: ").append(duration).append("ms\n");
-                logBuilder.append("Time: ").append(dateFormat.format(new Date(endTime))).append("\n");
+                logBuilder.append("Duration: ").append(duration).append("ms | ");
+                logBuilder.append("Time: ").append(dateFormat.format(new Date(endTime))).append(" | ");
                 
                 // 如果有异常，记录异常信息
                 if (ex != null) {
-                    logBuilder.append("Exception: ").append(ex.getClass().getName()).append(" - ").append(ex.getMessage()).append("\n");
+                    logBuilder.append("Exception: ").append(ex.getClass().getName()).append(" - ").append(ex.getMessage()).append(" | ");
                 }
                 
-                logBuilder.append("========== Access Log End ==========\n");
+                logBuilder.append("========== Access Log End ==========");
                 
                 logger.info(logBuilder.toString());
                 

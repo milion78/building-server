@@ -29,16 +29,17 @@ public class MapService {
     public List<MapPoint> loadPage(String topLeft, String bottomRight) {
         // Mock 数据，按照接口文档示例写死
         List<MapPoint> points = new ArrayList<>();
-
+        logger.info("MapService.loadPage - topLeft: {}, bottomRight: {}", topLeft, bottomRight);
         Double leftLongitude = CoordinateUtil.getLongitude(topLeft);
         Double topLatitude = CoordinateUtil.getLatitude(topLeft);
         Double rightLongitude = CoordinateUtil.getLongitude(bottomRight);
         Double bottomLatitude = CoordinateUtil.getLatitude(bottomRight);
         if (leftLongitude == null || topLatitude == null || rightLongitude == null || bottomLatitude == null) {
-            return new ArrayList<>();
+            logger.warn("坐标解析失败，topLeft: {}, bottomRight: {}", topLeft, bottomRight);
+            return points;
         }
-        int count =(int)Math.random()*10;
-        logger.info("count: {}", count);
+        int count = (int)(Math.random() * 10);
+        logger.info("MapService.loadPage - count: {}", count);
         for (int i = 0; i < count; i++) {
             double longitude = leftLongitude + Math.random() * (rightLongitude - leftLongitude);
             double latitude = topLatitude + Math.random() * (bottomLatitude - topLatitude);

@@ -4,6 +4,8 @@ import com.tencent.wxcloudrun.common.ResponseResult;
 import com.tencent.wxcloudrun.dto.MapLoadPageRequest;
 import com.tencent.wxcloudrun.model.MapPoint;
 import com.tencent.wxcloudrun.service.MapService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,6 +24,8 @@ import java.util.List;
 @RequestMapping("/map")
 public class MapController {
     
+    private static final Logger logger = LoggerFactory.getLogger(MapController.class);
+    
     @Autowired
     private MapService mapService;
     
@@ -33,8 +37,21 @@ public class MapController {
      * @return 统一响应格式，包含点位信息列表
      */
     @PostMapping("/loadPage")
-    public ResponseResult<List<MapPoint>> loadPage(@RequestBody MapLoadPageRequest request) {
-        List<MapPoint> points = mapService.loadPage(request.getTopLeft(), request.getBottomRight());
+    public ResponseResult<List<MapPoint>> loadPage(@RequestBody(required = false) MapLoadPageRequest request) {
+        logger.info("/map/loadPage post request, request: {}", request);
+        
+        // 处理请求体为空的情况
+        if (request == null) {
+            logger.warn("/map/loadPage request body is null");
+            request = new MapLoadPageRequest();
+        }
+        
+        String topLeft = request != null ? request.getTopLeft() : null;
+        String bottomRight = request != null ? request.getBottomRight() : null;
+        
+        logger.info("/map/loadPage topLeft: {}, bottomRight: {}", topLeft, bottomRight);
+        
+        List<MapPoint> points = mapService.loadPage(topLeft, bottomRight);
         return ResponseResult.success(points);
     }
 }

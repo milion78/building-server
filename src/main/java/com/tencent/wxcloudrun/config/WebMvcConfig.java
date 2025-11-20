@@ -21,7 +21,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(accessLogInterceptor)
                 .addPathPatterns("/**")
-                .excludePathPatterns("/health", "/static/**", "/error");
+                .excludePathPatterns("/static/**");
     }
 }
 

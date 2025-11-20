@@ -68,5 +68,10 @@ public class MapPoint {
     public void setPicUrl(String picUrl) {
         this.picUrl = picUrl;
     }
+    
+    @Override
+    public String toString() {
+        return "MapPoint{coordinate=" + coordinate + ", name=" + name + ", id=" + id + ", picUrl=" + picUrl + "}";
+    }
 }
 

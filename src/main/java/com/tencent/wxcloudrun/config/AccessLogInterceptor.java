@@ -31,10 +31,17 @@ public class AccessLogInterceptor implements HandlerInterceptor {
     
     private static final ThreadLocal<Long> startTimeThreadLocal = new ThreadLocal<>();
     private static final ThreadLocal<String> requestBodyThreadLocal = new ThreadLocal<>();
+    private static final ThreadLocal<ContentCachingResponseWrapper> responseWrapperThreadLocal = new ThreadLocal<>();
     
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         try {
+            // 从 request attribute 中获取响应包装器
+            Object wrapper = request.getAttribute("cachedResponseWrapper");
+            if (wrapper instanceof ContentCachingResponseWrapper) {
+                responseWrapperThreadLocal.set((ContentCachingResponseWrapper) wrapper);
+            }
+            
             // 记录开始时间
             long startTime = System.currentTimeMillis();
             startTimeThreadLocal.set(startTime);
@@ -119,6 +126,25 @@ public class AccessLogInterceptor implements HandlerInterceptor {
                 // 构建响应日志
                 StringBuilder logBuilder = new StringBuilder();
                 logBuilder.append("Response Status: ").append(response.getStatus()).append("\n");
+                
+                // 获取响应内容
+                ContentCachingResponseWrapper responseWrapper = responseWrapperThreadLocal.get();
+                if (responseWrapper != null) {
+                    try {
+                        String responseBody = responseWrapper.getContentAsString();
+                        if (responseBody != null && !responseBody.isEmpty()) {
+                            // 限制响应内容长度，避免日志过长
+                            if (responseBody.length() > 2000) {
+                                logBuilder.append("Response Body: ").append(responseBody.substring(0, 2000)).append("... (truncated)\n");
+                            } else {
+                                logBuilder.append("Response Body: ").append(responseBody).append("\n");
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                
                 logBuilder.append("Duration: ").append(duration).append("ms\n");
                 logBuilder.append("Time: ").append(dateFormat.format(new Date(endTime))).append("\n");
                 
@@ -134,6 +160,7 @@ public class AccessLogInterceptor implements HandlerInterceptor {
                 // 清理 ThreadLocal
                 startTimeThreadLocal.remove();
                 requestBodyThreadLocal.remove();
+                responseWrapperThreadLocal.remove();
             }
         } catch (Exception e) {
             e.printStackTrace();

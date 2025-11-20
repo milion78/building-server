@@ -92,5 +92,22 @@ public class CoordinateUtil {
             return null;
         }
     }
+    
+    /**
+     * 生成坐标格式字符串
+     * 将经度和纬度组合成 "{经度,纬度}" 格式的字符串
+     * 
+     * @param longitude 经度值，double 类型
+     * @param latitude 纬度值，double 类型
+     * @return 坐标格式字符串，格式："{经度,纬度}"，例如："{12.23,-234.34}"
+     */
+    public static String formatCoordinate(double longitude, double latitude) {
+        try {
+            return "{" + longitude + "," + latitude + "}";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }
 

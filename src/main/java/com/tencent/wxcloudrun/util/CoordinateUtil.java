@@ -97,17 +97,55 @@ public class CoordinateUtil {
      * 生成坐标格式字符串
      * 将经度和纬度组合成 "{经度,纬度}" 格式的字符串
      * 
-     * @param longitude 经度值，double 类型
-     * @param latitude 纬度值，double 类型
-     * @return 坐标格式字符串，格式："{经度,纬度}"，例如："{12.23,-234.34}"
+     * @param longitude 经度值，double 类型，范围：-180 到 180
+     * @param latitude 纬度值，double 类型，范围：-90 到 90
+     * @return 坐标格式字符串，格式："{经度,纬度}"，例如："{12.23,-34.34}"，如果参数超出范围返回 null
      */
     public static String formatCoordinate(double longitude, double latitude) {
         try {
-            return "{" + longitude + "," + latitude + "}";
+            // 检查经度范围：-180 到 180
+            if (longitude > 180.0 || longitude < -180.0) {
+                logger.warn("经度超出范围: {}", longitude);
+                return null;
+            }
+            
+            // 检查纬度范围：-90 到 90
+            if (latitude > 90.0 || latitude < -90.0) {
+                logger.warn("纬度超出范围: {}", latitude);
+                return null;
+            }
+            
+            // 保留8位小数
+            // 使用 BigDecimal 或 String.format 来精确控制小数位数
+            String longitudeStr = String.format("%.8f", longitude);
+            String latitudeStr = String.format("%.8f", latitude);
+            
+            // 移除末尾多余的0（可选，保持格式简洁）
+            longitudeStr = removeTrailingZeros(longitudeStr);
+            latitudeStr = removeTrailingZeros(latitudeStr);
+            
+            return "{" + longitudeStr + "," + latitudeStr + "}";
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
+    }
+    
+    /**
+     * 移除字符串末尾的0和小数点（如果小数点后全是0）
+     * 例如：12.34000000 -> 12.34, 12.00000000 -> 12
+     */
+    private static String removeTrailingZeros(String numberStr) {
+        if (numberStr == null || !numberStr.contains(".")) {
+            return numberStr;
+        }
+        
+        // 移除末尾的0
+        numberStr = numberStr.replaceAll("0+$", "");
+        // 如果末尾是小数点，也移除
+        numberStr = numberStr.replaceAll("\\.$", "");
+        
+        return numberStr;
     }
 }
 

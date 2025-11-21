@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import com.tencent.wxcloudrun.util.CoordinateUtil;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,6 +18,7 @@ import org.slf4j.LoggerFactory;
 public class MapService {
 
     private static final Logger logger = LoggerFactory.getLogger(MapService.class);
+    private static final Random random = new Random();
 
     /**
      * 加载地图页面点位信息
@@ -38,7 +40,8 @@ public class MapService {
             logger.warn("坐标解析失败，topLeft: {}, bottomRight: {}", topLeft, bottomRight);
             return points;
         }
-        int count = (int)(Math.random() * 10);
+        // 生成 1-10 的随机数，确保至少有一个点位
+        int count = random.nextInt(10) + 1;
         logger.info("MapService.loadPage - count: {}", count);
         for (int i = 0; i < count; i++) {
             double longitude = leftLongitude + Math.random() * (rightLongitude - leftLongitude);

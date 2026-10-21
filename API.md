@@ -93,3 +93,5 @@ Object类型说明
 > - 接口名称
 > - 变更说明
 
+- 2026-10-21 `POST /map/loadPage`：不再返回随机点位，改为按视野范围查询 `relic_info`。`id`、`name`、`coordinate`、`picUrl` 分别对应文保 id、名称、经纬度、封面图。
+

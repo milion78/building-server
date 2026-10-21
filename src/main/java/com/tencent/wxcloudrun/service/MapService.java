@@ -1,11 +1,12 @@
 package com.tencent.wxcloudrun.service;
 
 import com.tencent.wxcloudrun.model.MapPoint;
+import com.tencent.wxcloudrun.model.RelicInfo;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.tencent.wxcloudrun.util.CoordinateUtil;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,18 +19,22 @@ import org.slf4j.LoggerFactory;
 public class MapService {
 
     private static final Logger logger = LoggerFactory.getLogger(MapService.class);
-    private static final Random random = new Random();
+
+    private final RelicInfoService relicInfoService;
+
+    public MapService(@Autowired RelicInfoService relicInfoService) {
+        this.relicInfoService = relicInfoService;
+    }
 
     /**
      * 加载地图页面点位信息
-     * 使用 mock 数据，根据请求参数返回写死的点位数据
+     * 按视野四角查询文保点，并转换成地图点位
      * 
      * @param topLeft 地图左上角经纬度
      * @param bottomRight 地图右下角经纬度
      * @return 点位信息列表
      */
     public List<MapPoint> loadPage(String topLeft, String bottomRight) {
-        // Mock 数据，按照接口文档示例写死
         List<MapPoint> points = new ArrayList<>();
         logger.info("MapService.loadPage - topLeft: {}, bottomRight: {}", topLeft, bottomRight);
         Double leftLongitude = CoordinateUtil.getLongitude(topLeft);
@@ -40,21 +45,24 @@ public class MapService {
             logger.warn("坐标解析失败，topLeft: {}, bottomRight: {}", topLeft, bottomRight);
             return points;
         }
-        // 生成 1-10 的随机数，确保至少有一个点位
-        int count = random.nextInt(10) + 1;
-        logger.info("MapService.loadPage - count: {}", count);
-        for (int i = 0; i < count; i++) {
-            double longitude = leftLongitude + Math.random() * (rightLongitude - leftLongitude);
-            double latitude = topLatitude + Math.random() * (bottomLatitude - topLatitude);
+        List<RelicInfo> relics = relicInfoService.listRelicInfoByLocation(
+                leftLongitude, topLatitude, rightLongitude, bottomLatitude);
+        for (RelicInfo relic : relics) {
+            if (relic.getLongitude() == null || relic.getLatitude() == null) {
+                continue;
+            }
+            String coordinate = CoordinateUtil.formatCoordinate(relic.getLongitude(), relic.getLatitude());
+            if (coordinate == null) {
+                continue;
+            }
             MapPoint point = new MapPoint();
-            point.setCoordinate(CoordinateUtil.formatCoordinate(longitude, latitude));
-            point.setName("卢沟桥" + i);
-            point.setId(i+1L);
-            point.setPicUrl("https://mp.weixin.qq.com/wxopen/basicprofile?action=get_headimg&token=50698586&t=1763474422323");
+            point.setId(relic.getId());
+            point.setName(relic.getRelicName());
+            point.setCoordinate(coordinate);
+            point.setPicUrl(relic.getCoverImage());
             points.add(point);
-            logger.info("point: {}", point);
-        }    
-
+        }
+        logger.info("MapService.loadPage - count: {}", points.size());
         return points;
     }
 }

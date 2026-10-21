@@ -120,3 +120,36 @@ curl -X POST -H 'content-type: application/json' -d '{"action": "inc"}' https://
 ## License
 
 [MIT](./LICENSE)
+
+
+## db
+
+### ip；
+10.11.110.166:3306
+### database ； building_db
+### username:serv
+### password:Mi78452300
+### 表
+CREATE TABLE `relic_info` (
+  `id` bigint(255) NOT NULL AUTO_INCREMENT,
+  `relic_name` varchar(255) DEFAULT '',
+  `complex_name` varchar(255) DEFAULT '',
+  `relic_category` varchar(255) DEFAULT '' COMMENT '分类',
+  `relic_rank` varchar(255) DEFAULT '' COMMENT '评级',
+  `description` text COMMENT '描述',
+  `relic_address` text COMMENT '地址',
+  `cover_image` text COMMENT '封面图',
+  `image_urls` text COMMENT '其他图片',
+  `logo` text,
+  `province` varchar(255) DEFAULT '',
+  `city` varchar(255) DEFAULT '',
+  `longitude` float DEFAULT NULL,
+  `latitude` float DEFAULT NULL,
+  `relic` text,
+  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_id` (`id`) USING BTREE,
+  KEY `idx_location` (`longitude`, `latitude`) USING BTREE,
+  KEY `idx_city` (`province`, `city`) USING BTREE,
+  KEY `idx_name` (`relic_name`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 6955 DEFAULT CHARSET = utf8 COMMENT = '文保明细'

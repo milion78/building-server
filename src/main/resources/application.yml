@@ -6,9 +6,9 @@ spring:
     name: building-server
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://${MYSQL_ADDRESS}/${MYSQL_DATABASE:springboot_demo}
-    username: ${MYSQL_USERNAME}
-    password: ${MYSQL_PASSWORD}
+    url: jdbc:mysql://${MYSQL_ADDRESS:10.11.110.166:3306}/${MYSQL_DATABASE:building_db}?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false
+    username: ${MYSQL_USERNAME:serv}
+    password: ${MYSQL_PASSWORD:Mi78452300}
   mvc:
     view:
       suffix: .html

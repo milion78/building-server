@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tencent.wxcloudrun.dao.RelicInfoMapper">
+
+    <resultMap id="relicInfoMap" type="com.tencent.wxcloudrun.model.RelicInfo">
+        <id property="id" column="id"/>
+        <result property="relicName" column="relic_name"/>
+        <result property="complexName" column="complex_name"/>
+        <result property="relicCategory" column="relic_category"/>
+        <result property="relicRank" column="relic_rank"/>
+        <result property="description" column="description"/>
+        <result property="relicAddress" column="relic_address"/>
+        <result property="coverImage" column="cover_image"/>
+        <result property="imageUrls" column="image_urls"/>
+        <result property="logo" column="logo"/>
+        <result property="province" column="province"/>
+        <result property="city" column="city"/>
+        <result property="longitude" column="longitude"/>
+        <result property="latitude" column="latitude"/>
+        <result property="relic" column="relic"/>
+        <result property="updateTime" column="update_time" javaType="java.time.LocalDateTime"/>
+    </resultMap>
+
+    <sql id="relicInfoColumns">
+        `id`, `relic_name`, `complex_name`, `relic_category`, `relic_rank`, `description`,
+        `relic_address`, `cover_image`, `image_urls`, `logo`, `province`, `city`,
+        `longitude`, `latitude`, `relic`, `update_time`
+    </sql>
+
+    <select id="getRelicInfo" resultMap="relicInfoMap">
+        SELECT
+        <include refid="relicInfoColumns"/>
+        FROM relic_info
+        WHERE id = #{id}
+    </select>
+
+    <select id="listRelicInfo" resultMap="relicInfoMap">
+        SELECT
+        <include refid="relicInfoColumns"/>
+        FROM relic_info
+        ORDER BY id
+    </select>
+
+    <select id="listRelicInfoByLocation" resultMap="relicInfoMap">
+        SELECT
+        <include refid="relicInfoColumns"/>
+        FROM relic_info
+        WHERE longitude &gt;= #{minLongitude}
+          AND longitude &lt;= #{maxLongitude}
+          AND latitude &gt;= #{minLatitude}
+          AND latitude &lt;= #{maxLatitude}
+        ORDER BY id
+    </select>
+
+</mapper>

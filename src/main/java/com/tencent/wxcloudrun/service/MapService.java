@@ -62,7 +62,7 @@ public class MapService {
             point.setId(relic.getId());
             point.setName(relic.getRelicName());
             point.setCoordinate(coordinate);
-            point.setPicUrl(fileService.getFileIdByUrl(relic.getCoverImage()));
+            point.setPicUrl(fileService.getUrlByFileId(fileService.getFileIdByUrl(relic.getCoverImage())));
             points.add(point);
         }
         logger.info("MapService.loadPage - count: {}", points.size());

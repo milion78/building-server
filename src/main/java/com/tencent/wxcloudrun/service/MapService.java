@@ -21,9 +21,12 @@ public class MapService {
     private static final Logger logger = LoggerFactory.getLogger(MapService.class);
 
     private final RelicInfoService relicInfoService;
+    private final FileService fileService;
 
-    public MapService(@Autowired RelicInfoService relicInfoService) {
+    public MapService(@Autowired RelicInfoService relicInfoService,
+                      @Autowired FileService fileService) {
         this.relicInfoService = relicInfoService;
+        this.fileService = fileService;
     }
 
     /**
@@ -59,7 +62,7 @@ public class MapService {
             point.setId(relic.getId());
             point.setName(relic.getRelicName());
             point.setCoordinate(coordinate);
-            point.setPicUrl(relic.getCoverImage());
+            point.setPicUrl(fileService.getFileIdByUrl(relic.getCoverImage()));
             points.add(point);
         }
         logger.info("MapService.loadPage - count: {}", points.size());

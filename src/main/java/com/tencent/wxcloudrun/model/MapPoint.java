@@ -26,6 +26,11 @@ public class MapPoint {
      * 点位的图片链接
      */
     private String picUrl;
+
+    /**
+     * 点位图片的云存储 fileId
+     */
+    private String picCloudId;
     
     public MapPoint() {
     }
@@ -68,10 +73,18 @@ public class MapPoint {
     public void setPicUrl(String picUrl) {
         this.picUrl = picUrl;
     }
+
+    public String getPicCloudId() {
+        return picCloudId;
+    }
+
+    public void setPicCloudId(String picCloudId) {
+        this.picCloudId = picCloudId;
+    }
     
     @Override
     public String toString() {
-        return "MapPoint{coordinate=" + coordinate + ", name=" + name + ", id=" + id + ", picUrl=" + picUrl + "}";
+        return "MapPoint{coordinate=" + coordinate + ", name=" + name + ", id=" + id + ", picUrl=" + picUrl + ", picCloudId=" + picCloudId + "}";
     }
 }
 

@@ -5,6 +5,7 @@ import com.tencent.wxcloudrun.model.RelicInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.tencent.wxcloudrun.util.CoordinateUtil;
+import com.tencent.wxcloudrun.util.IdCodeUtil;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
@@ -59,7 +60,7 @@ public class MapService {
                 continue;
             }
             MapPoint point = new MapPoint();
-            point.setId(relic.getId());
+            point.setId(IdCodeUtil.toCode(relic.getId()));
             point.setName(relic.getRelicName());
             point.setCoordinate(coordinate);
             String fileId = fileService.getFileIdByUrl(relic.getCoverImage());

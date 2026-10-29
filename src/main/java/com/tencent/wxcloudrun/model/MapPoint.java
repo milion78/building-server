@@ -18,9 +18,9 @@ public class MapPoint {
     private String name;
     
     /**
-     * 点位ID
+     * 点位 code，由文保 id 转换而来
      */
-    private Long id;
+    private String id;
     
     /**
      * 点位的图片链接
@@ -35,7 +35,7 @@ public class MapPoint {
     public MapPoint() {
     }
     
-    public MapPoint(String coordinate, String name, Long id, String picUrl) {
+    public MapPoint(String coordinate, String name, String id, String picUrl) {
         this.coordinate = coordinate;
         this.name = name;
         this.id = id;
@@ -58,11 +58,11 @@ public class MapPoint {
         this.name = name;
     }
     
-    public Long getId() {
+    public String getId() {
         return id;
     }
     
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
     

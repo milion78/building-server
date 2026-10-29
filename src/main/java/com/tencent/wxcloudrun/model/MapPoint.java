@@ -31,6 +31,16 @@ public class MapPoint {
      * 点位图片的云存储 fileId
      */
     private String picCloudId;
+
+    /**
+     * 文保级别
+     */
+    private String relicRank;
+
+    /**
+     * 文保地址
+     */
+    private String relicAddress;
     
     public MapPoint() {
     }
@@ -81,10 +91,26 @@ public class MapPoint {
     public void setPicCloudId(String picCloudId) {
         this.picCloudId = picCloudId;
     }
+
+    public String getRelicRank() {
+        return relicRank;
+    }
+
+    public void setRelicRank(String relicRank) {
+        this.relicRank = relicRank;
+    }
+
+    public String getRelicAddress() {
+        return relicAddress;
+    }
+
+    public void setRelicAddress(String relicAddress) {
+        this.relicAddress = relicAddress;
+    }
     
     @Override
     public String toString() {
-        return "MapPoint{coordinate=" + coordinate + ", name=" + name + ", id=" + id + ", picUrl=" + picUrl + ", picCloudId=" + picCloudId + "}";
+        return "MapPoint{coordinate=" + coordinate + ", name=" + name + ", id=" + id + ", picUrl=" + picUrl + ", picCloudId=" + picCloudId + ", relicRank=" + relicRank + ", relicAddress=" + relicAddress + "}";
     }
 }
 

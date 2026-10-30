@@ -42,6 +42,7 @@ public class RelicInfoController {
         if (id == null) {
             return ResponseResult.success(new RelicInfo());
         }
+        relicInfoService.fillImage(id, 1);
         return relicInfoService.getRelicInfo(id)
                 .map(ResponseResult::success)
                 .orElseGet(() -> ResponseResult.success(new RelicInfo()));

@@ -63,6 +63,11 @@ public class RelicInfoServiceImpl implements RelicInfoService {
     if (relic == null) {
       return;
     }
+    String coverImage = relic.getCoverImage();
+    if (coverImage != null && !coverImage.trim().isEmpty()) {
+      String coverFileId = fileService.getFileIdByUrl(coverImage);
+      relic.setCoverImage(coverFileId);
+    }
     List<String> urls = relic.getImageUrls();
     List<String> fileIds = new ArrayList<>();
     if (urls != null) {

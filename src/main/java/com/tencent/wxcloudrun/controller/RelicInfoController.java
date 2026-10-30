@@ -2,7 +2,6 @@ package com.tencent.wxcloudrun.controller;
 
 import com.tencent.wxcloudrun.common.ResponseResult;
 import com.tencent.wxcloudrun.model.RelicInfo;
-import com.tencent.wxcloudrun.service.FileService;
 import com.tencent.wxcloudrun.service.RelicInfoService;
 import com.tencent.wxcloudrun.util.IdCodeUtil;
 import org.slf4j.Logger;
@@ -28,12 +27,10 @@ public class RelicInfoController {
     @Autowired
     private RelicInfoService relicInfoService;
 
-    @Autowired
-    private FileService fileService;
-
     /**
      * 按 code 查询文保详情
      * 接口地址: POST /relic/getById
+     * coverImage、imageUrls 在服务层已转成 fileId，供前端 getTempFileURL 换链
      *
      * @param code 文保 code
      * @return 文保详情；code 无效或查不到时返回空对象
@@ -46,10 +43,7 @@ public class RelicInfoController {
             return ResponseResult.success(new RelicInfo());
         }
         return relicInfoService.getRelicInfo(id)
-                .map(relic -> {
-                    relic.setCoverImage(fileService.getUrlByFileId(fileService.getFileIdByUrl(relic.getCoverImage())));
-                    return ResponseResult.success(relic);
-                })
+                .map(ResponseResult::success)
                 .orElseGet(() -> ResponseResult.success(new RelicInfo()));
     }
 }

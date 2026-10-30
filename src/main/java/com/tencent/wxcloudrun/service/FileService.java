@@ -62,10 +62,7 @@ public class FileService {
             logger.warn("fileId 为空，无法生成访问地址");
             return null;
         }
-        String objectKey = fileId.trim();
-        while (objectKey.startsWith("/")) {
-            objectKey = objectKey.substring(1);
-        }
+        String objectKey = toObjectKey(fileId);
         GeneratePresignedUrlRequest request = new GeneratePresignedUrlRequest(
                 bucket, objectKey, HttpMethodName.GET);
         request.setExpiration(new Date(System.currentTimeMillis() + expireSeconds * 1000L));
@@ -107,6 +104,23 @@ public class FileService {
         String fileId = FILE_ID_PREFIX + fileName;
         logger.info("FileService.getFileIdByUrl - fileId: {}", fileId);
         return fileId;
+    }
+
+    /**
+     * cloud://环境.存储桶/pic/文件名 里，对象键是 pic/文件名。
+     */
+    private static String toObjectKey(String fileId) {
+        String objectKey = fileId.trim();
+        if (objectKey.startsWith("cloud://")) {
+            int slash = objectKey.indexOf('/', "cloud://".length());
+            if (slash >= 0 && slash + 1 < objectKey.length()) {
+                objectKey = objectKey.substring(slash + 1);
+            }
+        }
+        while (objectKey.startsWith("/")) {
+            objectKey = objectKey.substring(1);
+        }
+        return objectKey;
     }
 
     private COSClient client() {

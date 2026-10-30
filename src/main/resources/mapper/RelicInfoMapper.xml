@@ -53,4 +53,28 @@
         ORDER BY id
     </select>
 
+    <select id="listRelicInfoFromId" resultMap="relicInfoMap">
+        SELECT
+        <include refid="relicInfoColumns"/>
+        FROM relic_info
+        WHERE id &gt;= #{id}
+          AND (image_urls IS NULL OR image_urls = '' OR image_urls = '[]')
+        ORDER BY id
+        LIMIT #{count}
+    </select>
+
+    <select id="listRelicInfoByName" resultMap="relicInfoMap">
+        SELECT
+        <include refid="relicInfoColumns"/>
+        FROM relic_info
+        WHERE relic_name = #{relicName}
+        ORDER BY id
+    </select>
+
+    <update id="updateImageUrls">
+        UPDATE relic_info
+        SET image_urls = #{imageUrls, typeHandler=com.tencent.wxcloudrun.typehandler.ImageUrlsTypeHandler}
+        WHERE id = #{id}
+    </update>
+
 </mapper>

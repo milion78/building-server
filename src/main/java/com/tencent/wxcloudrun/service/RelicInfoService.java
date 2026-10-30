@@ -12,4 +12,6 @@ public interface RelicInfoService {
   List<RelicInfo> listRelicInfo();
 
   List<RelicInfo> listRelicInfoByLocation(double leftLongitude, double topLatitude, double rightLongitude, double bottomLatitude);
+
+  int fillImage(Long id, int count);
 }

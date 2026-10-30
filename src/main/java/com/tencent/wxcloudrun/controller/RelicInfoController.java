@@ -46,4 +46,21 @@ public class RelicInfoController {
                 .map(ResponseResult::success)
                 .orElseGet(() -> ResponseResult.success(new RelicInfo()));
     }
+
+    /**
+     * 按 id 顺序补齐 imageUrls。
+     * 用同名其他记录的封面图更新当前记录。
+     * 接口地址: POST /relic/fillImage
+     *
+     * @param id 起始 id，从这个 id 开始向后处理
+     * @param count 向后处理的文保条数
+     * @return 实际更新的记录数
+     */
+    @PostMapping("/fillImage")
+    public ResponseResult<Integer> fillImage(@RequestParam(required = false) Long id,
+                                             @RequestParam(required = false) Integer count) {
+        logger.info("/relic/fillImage post request, id: {}, count: {}", id, count);
+        int size = count == null ? 0 : count;
+        return ResponseResult.success(relicInfoService.fillImage(id, size));
+    }
 }

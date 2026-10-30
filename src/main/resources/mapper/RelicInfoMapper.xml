@@ -11,7 +11,8 @@
         <result property="description" column="description"/>
         <result property="relicAddress" column="relic_address"/>
         <result property="coverImage" column="cover_image"/>
-        <result property="imageUrls" column="image_urls"/>
+        <result property="imageUrls" column="image_urls"
+                typeHandler="com.tencent.wxcloudrun.typehandler.ImageUrlsTypeHandler"/>
         <result property="logo" column="logo"/>
         <result property="province" column="province"/>
         <result property="city" column="city"/>

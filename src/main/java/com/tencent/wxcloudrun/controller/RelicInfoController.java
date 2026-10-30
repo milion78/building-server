@@ -4,6 +4,7 @@ import com.tencent.wxcloudrun.common.ResponseResult;
 import com.tencent.wxcloudrun.model.RelicInfo;
 import com.tencent.wxcloudrun.service.FileService;
 import com.tencent.wxcloudrun.service.RelicInfoService;
+import com.tencent.wxcloudrun.util.IdCodeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,23 +32,24 @@ public class RelicInfoController {
     private FileService fileService;
 
     /**
-     * 按 id 查询文保详情
+     * 按 code 查询文保详情
      * 接口地址: POST /relic/getById
      *
-     * @param id 文保 id
-     * @return 统一响应格式，包含文保详情
+     * @param code 文保 code
+     * @return 文保详情；code 无效或查不到时返回空对象
      */
     @PostMapping("/getById")
-    public ResponseResult<RelicInfo> getRelicInfoById(@RequestParam(required = false) Long id) {
-        logger.info("/relic/getById post request, id: {}", id);
+    public ResponseResult<RelicInfo> getRelicInfoById(@RequestParam(required = false) String code) {
+        logger.info("/relic/getById post request, code: {}", code);
+        Long id = IdCodeUtil.toId(code);
         if (id == null) {
-            return ResponseResult.error(1L, "id 不能为空");
+            return ResponseResult.success(new RelicInfo());
         }
         return relicInfoService.getRelicInfo(id)
                 .map(relic -> {
                     relic.setCoverImage(fileService.getUrlByFileId(fileService.getFileIdByUrl(relic.getCoverImage())));
                     return ResponseResult.success(relic);
                 })
-                .orElseGet(() -> ResponseResult.error(1L, "文保不存在"));
+                .orElseGet(() -> ResponseResult.success(new RelicInfo()));
     }
 }

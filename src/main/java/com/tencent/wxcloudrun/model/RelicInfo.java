@@ -4,6 +4,8 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 public class RelicInfo implements Serializable {
@@ -24,7 +26,7 @@ public class RelicInfo implements Serializable {
 
   private String coverImage;
 
-  private String imageUrls;
+  private List<String> imageUrls = new ArrayList<>();
 
   private String logo;
 

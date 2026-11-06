@@ -1,11 +1,12 @@
-package com.tencent.wxcloudrun.service;
+package com.tencent.wxcloudrun.service.entity;
 
 import com.tencent.wxcloudrun.model.RelicInfo;
+import com.tencent.wxcloudrun.service.DtoSerrvice;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface RelicInfoService {
+public interface RelicInfoService extends DtoSerrvice<RelicInfo> {
 
   Optional<RelicInfo> getRelicInfo(Long id);
 

@@ -3,7 +3,7 @@ package com.tencent.wxcloudrun.model;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.util.Date;
 
 @Data
 public class Counter implements Serializable {
@@ -12,7 +12,7 @@ public class Counter implements Serializable {
 
   private Integer count;
 
-  private LocalDateTime createdAt;
+  private Date createdAt;
 
-  private LocalDateTime updatedAt;
+  private Date updatedAt;
 }

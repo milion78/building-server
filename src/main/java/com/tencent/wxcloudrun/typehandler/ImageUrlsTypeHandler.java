@@ -48,7 +48,7 @@ public class ImageUrlsTypeHandler implements TypeHandler<List<String>> {
         return parse(cs.getString(columnIndex));
     }
 
-    static List<String> parse(String raw) {
+    public static List<String> parse(String raw) {
         List<String> urls = new ArrayList<>();
         if (raw == null || raw.trim().isEmpty()) {
             return urls;

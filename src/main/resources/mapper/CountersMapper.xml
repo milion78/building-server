@@ -5,8 +5,8 @@
     <resultMap id="countersMapper" type="com.tencent.wxcloudrun.model.Counter">
         <id property="id" column="id"/>
         <result property="count" column="count"/>
-        <result property="createdAt" column="createdAt" javaType="java.time.LocalDateTime" />
-        <result property="updatedAt" column="updatedAt" javaType="java.time.LocalDateTime"  />
+        <result property="createdAt" column="createdAt" javaType="java.util.Date" />
+        <result property="updatedAt" column="updatedAt" javaType="java.util.Date"  />
     </resultMap>
 
     <select id="getCounter" resultMap="countersMapper" parameterType="java.lang.Integer">

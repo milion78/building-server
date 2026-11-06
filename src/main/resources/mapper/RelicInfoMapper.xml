@@ -11,15 +11,14 @@
         <result property="description" column="description"/>
         <result property="relicAddress" column="relic_address"/>
         <result property="coverImage" column="cover_image"/>
-        <result property="imageUrls" column="image_urls"
-                typeHandler="com.tencent.wxcloudrun.typehandler.ImageUrlsTypeHandler"/>
+        <result property="imageUrls" column="image_urls"/>
         <result property="logo" column="logo"/>
         <result property="province" column="province"/>
         <result property="city" column="city"/>
         <result property="longitude" column="longitude"/>
         <result property="latitude" column="latitude"/>
         <result property="relic" column="relic"/>
-        <result property="updateTime" column="update_time" javaType="java.time.LocalDateTime"/>
+        <result property="updateTime" column="update_time" javaType="java.util.Date"/>
     </resultMap>
 
     <sql id="relicInfoColumns">
@@ -76,5 +75,39 @@
         SET image_urls = #{imageUrls, typeHandler=com.tencent.wxcloudrun.typehandler.ImageUrlsTypeHandler}
         WHERE id = #{id}
     </update>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO relic_info (
+            relic_name, complex_name, relic_category, relic_rank, description, relic_address,
+            cover_image, image_urls, logo, province, city, longitude, latitude, relic
+        ) VALUES (
+            #{relicName}, #{complexName}, #{relicCategory}, #{relicRank}, #{description}, #{relicAddress},
+            #{coverImage}, #{imageUrls}, #{logo}, #{province}, #{city}, #{longitude}, #{latitude}, #{relic}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE relic_info
+        SET relic_name = #{relicName},
+            complex_name = #{complexName},
+            relic_category = #{relicCategory},
+            relic_rank = #{relicRank},
+            description = #{description},
+            relic_address = #{relicAddress},
+            cover_image = #{coverImage},
+            image_urls = #{imageUrls},
+            logo = #{logo},
+            province = #{province},
+            city = #{city},
+            longitude = #{longitude},
+            latitude = #{latitude},
+            relic = #{relic},
+            update_time = CURRENT_TIMESTAMP
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM relic_info WHERE id = #{id}
+    </delete>
 
 </mapper>

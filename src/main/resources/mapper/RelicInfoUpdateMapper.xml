@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tencent.wxcloudrun.dao.RelicInfoUpdateMapper">
+
+    <resultMap id="relicInfoUpdateMap" type="com.tencent.wxcloudrun.model.RelicInfoUpdate">
+        <id property="id" column="id"/>
+        <result property="sourceId" column="source_id"/>
+        <result property="relicName" column="relic_name"/>
+        <result property="complexName" column="complex_name"/>
+        <result property="relicCategory" column="relic_category"/>
+        <result property="relicRank" column="relic_rank"/>
+        <result property="description" column="description"/>
+        <result property="relicAddress" column="relic_address"/>
+        <result property="coverImage" column="cover_image"/>
+        <result property="logo" column="logo"/>
+        <result property="province" column="province"/>
+        <result property="city" column="city"/>
+        <result property="longitude" column="longitude"/>
+        <result property="latitude" column="latitude"/>
+        <result property="era" column="era"/>
+        <result property="relic" column="relic"/>
+        <result property="updateTime" column="update_time" javaType="java.util.Date"/>
+    </resultMap>
+
+    <sql id="relicInfoUpdateColumns">
+        `id`, `source_id`, `relic_name`, `complex_name`, `relic_category`, `relic_rank`,
+        `description`, `relic_address`, `cover_image`, `logo`, `province`, `city`,
+        `longitude`, `latitude`, `era`, `relic`, `update_time`
+    </sql>
+
+    <select id="getRelicInfoUpdate" resultMap="relicInfoUpdateMap">
+        SELECT
+        <include refid="relicInfoUpdateColumns"/>
+        FROM relic_info_update
+        WHERE id = #{id}
+    </select>
+
+    <select id="getRelicInfoUpdateBySourceId" resultMap="relicInfoUpdateMap">
+        SELECT
+        <include refid="relicInfoUpdateColumns"/>
+        FROM relic_info_update
+        WHERE source_id = #{sourceId}
+        ORDER BY id
+        LIMIT 1
+    </select>
+
+    <select id="listRelicInfoUpdate" resultMap="relicInfoUpdateMap">
+        SELECT
+        <include refid="relicInfoUpdateColumns"/>
+        FROM relic_info_update
+        ORDER BY id
+    </select>
+
+    <select id="listRelicInfoUpdateByLocation" resultMap="relicInfoUpdateMap">
+        SELECT
+        <include refid="relicInfoUpdateColumns"/>
+        FROM relic_info_update
+        WHERE longitude &gt;= #{minLongitude}
+          AND longitude &lt;= #{maxLongitude}
+          AND latitude &gt;= #{minLatitude}
+          AND latitude &lt;= #{maxLatitude}
+        ORDER BY id
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO relic_info_update (
+            source_id, relic_name, complex_name, relic_category, relic_rank, description,
+            relic_address, cover_image, logo, province, city, longitude, latitude, era, relic
+        ) VALUES (
+            #{sourceId}, #{relicName}, #{complexName}, #{relicCategory}, #{relicRank}, #{description},
+            #{relicAddress}, #{coverImage}, #{logo}, #{province}, #{city}, #{longitude}, #{latitude}, #{era}, #{relic}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE relic_info_update
+        SET source_id = #{sourceId},
+            relic_name = #{relicName},
+            complex_name = #{complexName},
+            relic_category = #{relicCategory},
+            relic_rank = #{relicRank},
+            description = #{description},
+            relic_address = #{relicAddress},
+            cover_image = #{coverImage},
+            logo = #{logo},
+            province = #{province},
+            city = #{city},
+            longitude = #{longitude},
+            latitude = #{latitude},
+            era = #{era},
+            relic = #{relic},
+            update_time = CURRENT_TIMESTAMP
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM relic_info_update WHERE id = #{id}
+    </delete>
+
+</mapper>

@@ -1,7 +1,8 @@
 package com.tencent.wxcloudrun.service;
 
-import com.tencent.wxcloudrun.model.MapPoint;
+import com.tencent.wxcloudrun.dto.MapPoint;
 import com.tencent.wxcloudrun.model.RelicInfo;
+import com.tencent.wxcloudrun.service.entity.RelicInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.tencent.wxcloudrun.util.CoordinateUtil;

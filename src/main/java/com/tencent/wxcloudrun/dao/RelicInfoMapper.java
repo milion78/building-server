@@ -23,4 +23,10 @@ public interface RelicInfoMapper {
   List<RelicInfo> listRelicInfoByName(@Param("relicName") String relicName);
 
   int updateImageUrls(@Param("id") Long id, @Param("imageUrls") List<String> imageUrls);
+
+  int insert(RelicInfo entity);
+
+  int update(RelicInfo entity);
+
+  int deleteById(@Param("id") Long id);
 }

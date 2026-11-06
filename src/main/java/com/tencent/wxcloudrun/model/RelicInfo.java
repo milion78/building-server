@@ -3,9 +3,7 @@ package com.tencent.wxcloudrun.model;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Date;
 
 @Data
 public class RelicInfo implements Serializable {
@@ -26,7 +24,7 @@ public class RelicInfo implements Serializable {
 
   private String coverImage;
 
-  private List<String> imageUrls = new ArrayList<>();
+  private String imageUrls;
 
   private String logo;
 
@@ -40,5 +38,5 @@ public class RelicInfo implements Serializable {
 
   private String relic;
 
-  private LocalDateTime updateTime;
+  private Date updateTime;
 }

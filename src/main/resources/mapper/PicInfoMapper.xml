@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tencent.wxcloudrun.dao.PicInfoMapper">
+
+    <resultMap id="picInfoMap" type="com.tencent.wxcloudrun.model.PicInfo">
+        <id property="id" column="id"/>
+        <result property="url" column="url"/>
+        <result property="useeNickname" column="usee_nickname"/>
+        <result property="userId" column="user_id"/>
+        <result property="userHeadUrl" column="user_head_url"/>
+        <result property="relicId" column="relic_id"/>
+        <result property="relicName" column="relic_name"/>
+        <result property="type" column="type"/>
+        <result property="longitude" column="longitude"/>
+        <result property="latitude" column="latitude"/>
+        <result property="picTime" column="pic_time"/>
+        <result property="detailExtra" column="detail_extra"/>
+        <result property="updateTime" column="update_time" javaType="java.util.Date"/>
+    </resultMap>
+
+    <sql id="picInfoColumns">
+        `id`, `url`, `usee_nickname`, `user_id`, `user_head_url`, `relic_id`, `relic_name`,
+        `type`, `longitude`, `latitude`, `pic_time`, `detail_extra`, `update_time`
+    </sql>
+
+    <select id="getPicInfo" resultMap="picInfoMap">
+        SELECT
+        <include refid="picInfoColumns"/>
+        FROM pic_info
+        WHERE id = #{id}
+    </select>
+
+    <select id="listPicInfo" resultMap="picInfoMap">
+        SELECT
+        <include refid="picInfoColumns"/>
+        FROM pic_info
+        ORDER BY id
+    </select>
+
+    <select id="listPicInfoByRelicTypeAfter" resultMap="picInfoMap">
+        SELECT
+        <include refid="picInfoColumns"/>
+        FROM pic_info
+        WHERE relic_id = #{relicId}
+          AND type = #{type}
+          AND update_time &gt; #{updateTime}
+        ORDER BY update_time, id
+    </select>
+
+    <select id="listPicInfoByRelicId" resultMap="picInfoMap">
+        SELECT
+        <include refid="picInfoColumns"/>
+        FROM pic_info
+        WHERE relic_id = #{relicId}
+        ORDER BY id
+    </select>
+
+    <select id="listPicInfoByLocation" resultMap="picInfoMap">
+        SELECT
+        <include refid="picInfoColumns"/>
+        FROM pic_info
+        WHERE longitude &gt;= #{minLongitude}
+          AND longitude &lt;= #{maxLongitude}
+          AND latitude &gt;= #{minLatitude}
+          AND latitude &lt;= #{maxLatitude}
+        ORDER BY id
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO pic_info (
+            url, usee_nickname, user_id, user_head_url, relic_id, relic_name,
+            type, longitude, latitude, pic_time, detail_extra
+        ) VALUES (
+            #{url}, #{useeNickname}, #{userId}, #{userHeadUrl}, #{relicId}, #{relicName},
+            #{type}, #{longitude}, #{latitude}, #{picTime}, #{detailExtra}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE pic_info
+        SET url = #{url},
+            usee_nickname = #{useeNickname},
+            user_id = #{userId},
+            user_head_url = #{userHeadUrl},
+            relic_id = #{relicId},
+            relic_name = #{relicName},
+            type = #{type},
+            longitude = #{longitude},
+            latitude = #{latitude},
+            pic_time = #{picTime},
+            detail_extra = #{detailExtra},
+            update_time = CURRENT_TIMESTAMP
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM pic_info WHERE id = #{id}
+    </delete>
+
+</mapper>

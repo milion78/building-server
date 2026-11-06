@@ -1,7 +1,7 @@
 package com.tencent.wxcloudrun.controller;
 
 import com.tencent.wxcloudrun.common.ResponseResult;
-import com.tencent.wxcloudrun.model.MapPoint;
+import com.tencent.wxcloudrun.dto.MapPoint;
 import com.tencent.wxcloudrun.service.MapService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

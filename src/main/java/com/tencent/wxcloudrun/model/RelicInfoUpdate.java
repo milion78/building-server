@@ -1,0 +1,44 @@
+package com.tencent.wxcloudrun.model;
+
+import lombok.Data;
+
+import java.io.Serializable;
+import java.util.Date;
+
+@Data
+public class RelicInfoUpdate implements Serializable {
+
+  private Long id;
+
+  private Long sourceId;
+
+  private String relicName;
+
+  private String complexName;
+
+  private String relicCategory;
+
+  private String relicRank;
+
+  private String description;
+
+  private String relicAddress;
+
+  private String coverImage;
+
+  private String logo;
+
+  private String province;
+
+  private String city;
+
+  private Float longitude;
+
+  private Float latitude;
+
+  private String era;
+
+  private String relic;
+
+  private Date updateTime;
+}

@@ -3,7 +3,7 @@ package com.tencent.wxcloudrun.service.impl;
 import com.tencent.wxcloudrun.dao.RelicInfoMapper;
 import com.tencent.wxcloudrun.model.RelicInfo;
 import com.tencent.wxcloudrun.service.FileService;
-import com.tencent.wxcloudrun.service.RelicInfoService;
+import com.tencent.wxcloudrun.service.entity.RelicInfoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,6 +98,31 @@ public class RelicInfoServiceImpl implements RelicInfoService {
     return updated;
   }
 
+  @Override
+  public Optional<RelicInfo> selectById(Long id) {
+    return getRelicInfo(id);
+  }
+
+  @Override
+  public List<RelicInfo> selectList() {
+    return listRelicInfo();
+  }
+
+  @Override
+  public int insert(RelicInfo entity) {
+    return relicInfoMapper.insert(entity);
+  }
+
+  @Override
+  public int update(RelicInfo entity) {
+    return relicInfoMapper.update(entity);
+  }
+
+  @Override
+  public int deleteById(Long id) {
+    return relicInfoMapper.deleteById(id);
+  }
+
   private void fillImageFileIds(List<RelicInfo> relics) {
     if (relics == null) {
       return;
@@ -113,22 +138,7 @@ public class RelicInfoServiceImpl implements RelicInfoService {
     }
     String coverImage = relic.getCoverImage();
     if (coverImage != null && !coverImage.trim().isEmpty()) {
-      String coverFileId = fileService.getFileIdByUrl(coverImage);
-      relic.setCoverImage(coverFileId);
+      relic.setCoverImage(fileService.getFileIdByUrl(coverImage));
     }
-    List<String> urls = relic.getImageUrls();
-    List<String> fileIds = new ArrayList<>();
-    if (urls != null) {
-      for (String url : urls) {
-        if (url == null || url.trim().isEmpty()) {
-          continue;
-        }
-        String fileId = fileService.getFileIdByUrl(url);
-        if (fileId != null && !fileId.trim().isEmpty()) {
-          fileIds.add(fileId);
-        }
-      }
-    }
-    relic.setImageUrls(fileIds);
   }
 }

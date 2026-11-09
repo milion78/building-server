@@ -4,6 +4,7 @@
 
     <resultMap id="relicInfoMap" type="com.tencent.wxcloudrun.model.RelicInfo">
         <id property="id" column="id"/>
+        <result property="sourceId" column="source_id"/>
         <result property="relicName" column="relic_name"/>
         <result property="complexName" column="complex_name"/>
         <result property="relicCategory" column="relic_category"/>
@@ -22,7 +23,7 @@
     </resultMap>
 
     <sql id="relicInfoColumns">
-        `id`, `relic_name`, `complex_name`, `relic_category`, `relic_rank`, `description`,
+        `id`, `source_id`, `relic_name`, `complex_name`, `relic_category`, `relic_rank`, `description`,
         `relic_address`, `cover_image`, `image_urls`, `logo`, `province`, `city`,
         `longitude`, `latitude`, `relic`, `update_time`
     </sql>
@@ -78,17 +79,18 @@
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO relic_info (
-            relic_name, complex_name, relic_category, relic_rank, description, relic_address,
+            source_id, relic_name, complex_name, relic_category, relic_rank, description, relic_address,
             cover_image, image_urls, logo, province, city, longitude, latitude, relic
         ) VALUES (
-            #{relicName}, #{complexName}, #{relicCategory}, #{relicRank}, #{description}, #{relicAddress},
+            #{sourceId}, #{relicName}, #{complexName}, #{relicCategory}, #{relicRank}, #{description}, #{relicAddress},
             #{coverImage}, #{imageUrls}, #{logo}, #{province}, #{city}, #{longitude}, #{latitude}, #{relic}
         )
     </insert>
 
     <update id="update">
         UPDATE relic_info
-        SET relic_name = #{relicName},
+        SET source_id = #{sourceId},
+            relic_name = #{relicName},
             complex_name = #{complexName},
             relic_category = #{relicCategory},
             relic_rank = #{relicRank},

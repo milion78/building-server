@@ -80,8 +80,7 @@ public class JsonBodyToParameterFilter implements Filter {
      */
     private String getRequestBody(HttpServletRequest request) {
         StringBuilder body = new StringBuilder();
-        try {
-            BufferedReader reader = request.getReader();
+        try (BufferedReader reader = request.getReader()) {
             String line;
             while ((line = reader.readLine()) != null) {
                 body.append(line);

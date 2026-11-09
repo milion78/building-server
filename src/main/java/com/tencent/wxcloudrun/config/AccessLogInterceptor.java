@@ -34,6 +34,7 @@ public class AccessLogInterceptor implements HandlerInterceptor {
     private static final ThreadLocal<ContentCachingResponseWrapper> responseWrapperThreadLocal = new ThreadLocal<>();
     
     @Override
+    @SuppressWarnings("unused")
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         try {
             // 从 request attribute 中获取响应包装器
@@ -111,11 +112,13 @@ public class AccessLogInterceptor implements HandlerInterceptor {
     }
     
     @Override
+    @SuppressWarnings("unused")
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
         // 在视图渲染前执行，这里不需要处理
     }
     
     @Override
+    @SuppressWarnings("unused")
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
         try {
             Long startTime = startTimeThreadLocal.get();
@@ -172,8 +175,7 @@ public class AccessLogInterceptor implements HandlerInterceptor {
      */
     private String getRequestBody(HttpServletRequest request) {
         StringBuilder body = new StringBuilder();
-        try {
-            BufferedReader reader = request.getReader();
+        try (BufferedReader reader = request.getReader()) {
             String line;
             while ((line = reader.readLine()) != null) {
                 body.append(line);

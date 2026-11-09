@@ -8,6 +8,8 @@ import java.util.Date;
 @Data
 public class RelicInfoUpdate implements Serializable {
 
+  private static final long serialVersionUID = 1L;
+
   private Long id;
 
   private Long sourceId;

@@ -10,6 +10,8 @@ import java.util.List;
 @Data
 public class RelicDetail implements Serializable {
 
+  private static final long serialVersionUID = 1L;
+
   private Long id;
 
   private String relicName;

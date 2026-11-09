@@ -55,6 +55,15 @@
         ORDER BY id
     </select>
 
+    <select id="listPicInfoByRelicIdAndType" resultMap="picInfoMap">
+        SELECT
+        <include refid="picInfoColumns"/>
+        FROM pic_info
+        WHERE relic_id = #{relicId}
+          AND type = #{type}
+        ORDER BY id
+    </select>
+
     <select id="listPicInfoByLocation" resultMap="picInfoMap">
         SELECT
         <include refid="picInfoColumns"/>

@@ -15,6 +15,8 @@ public interface PicInfoService extends DtoSerrvice<PicInfo> {
 
   List<PicInfo> listPicInfoByRelicId(Long relicId);
 
+  List<PicInfo> listPicInfoByRelicIdAndType(Long relicId, String type);
+
   List<PicInfo> listPicInfoByRelicTypeAfter(Long relicId, String type, Date updateTime);
 
   List<PicInfo> listPicInfoByLocation(double leftLongitude, double topLatitude, double rightLongitude, double bottomLatitude);

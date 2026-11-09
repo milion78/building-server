@@ -35,6 +35,11 @@ public class PicInfoServiceImpl implements PicInfoService {
   }
 
   @Override
+  public List<PicInfo> listPicInfoByRelicIdAndType(Long relicId, String type) {
+    return picInfoMapper.listPicInfoByRelicIdAndType(relicId, type);
+  }
+
+  @Override
   public List<PicInfo> listPicInfoByRelicTypeAfter(Long relicId, String type, Date updateTime) {
     return picInfoMapper.listPicInfoByRelicTypeAfter(relicId, type, updateTime);
   }

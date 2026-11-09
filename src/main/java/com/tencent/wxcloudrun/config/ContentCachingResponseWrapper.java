@@ -26,11 +26,11 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
     }
     
     @Override
-    public ServletOutputStream getOutputStream() throws IOException {
+    public ServletOutputStream getOutputStream() {
         if (outputStream == null) {
             outputStream = new ServletOutputStream() {
                 @Override
-                public void write(int b) throws IOException {
+                public void write(int b) {
                     content.write(b);
                 }
                 
@@ -40,6 +40,7 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
                 }
                 
                 @Override
+                @SuppressWarnings("unused")
                 public void setWriteListener(WriteListener listener) {
                     // 不需要实现
                 }

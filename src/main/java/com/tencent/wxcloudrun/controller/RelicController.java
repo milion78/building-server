@@ -2,12 +2,9 @@ package com.tencent.wxcloudrun.controller;
 
 import com.tencent.wxcloudrun.common.ResponseResult;
 import com.tencent.wxcloudrun.dto.RelicDetail;
-import com.tencent.wxcloudrun.model.RelicInfo;
-import com.tencent.wxcloudrun.service.FileService;
+import com.tencent.wxcloudrun.service.RelicService;
 import com.tencent.wxcloudrun.service.entity.RelicInfoService;
-import com.tencent.wxcloudrun.typehandler.ImageUrlsTypeHandler;
 import com.tencent.wxcloudrun.util.IdCodeUtil;
-import org.springframework.beans.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,9 +12,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * 文保详情接口控制器
@@ -27,15 +21,15 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/relic")
-public class RelicInfoController {
+public class RelicController {
 
-    private static final Logger logger = LoggerFactory.getLogger(RelicInfoController.class);
+    private static final Logger logger = LoggerFactory.getLogger(RelicController.class);
 
     @Autowired
     private RelicInfoService relicInfoService;
 
     @Autowired
-    private FileService fileService;
+    private RelicService relicService;
 
     /**
      * 按 code 查询文保详情
@@ -54,29 +48,8 @@ public class RelicInfoController {
         }
         relicInfoService.fillImage(id, 1);
         return relicInfoService.getRelicInfo(id)
-                .map(relic -> ResponseResult.success(toRelicDetail(relic)))
+                .map(relic -> ResponseResult.success(relicService.toRelicDetail(relic)))
                 .orElseGet(() -> ResponseResult.success(new RelicDetail()));
-    }
-
-    private RelicDetail toRelicDetail(RelicInfo relic) {
-        RelicDetail detail = new RelicDetail();
-        if (relic == null) {
-            return detail;
-        }
-        BeanUtils.copyProperties(relic, detail);
-        detail.setImageUrls(toImageFileIds(relic.getImageUrls()));
-        return detail;
-    }
-
-    private List<String> toImageFileIds(String imageUrls) {
-        List<String> fileIds = new ArrayList<>();
-        for (String url : ImageUrlsTypeHandler.parse(imageUrls)) {
-            String fileId = fileService.getFileIdByUrl(url);
-            if (fileId != null && !fileId.trim().isEmpty()) {
-                fileIds.add(fileId);
-            }
-        }
-        return fileIds;
     }
 
     /**

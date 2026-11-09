@@ -21,9 +21,11 @@ public class ImageUrlsTypeHandler implements TypeHandler<List<String>> {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private static final TypeReference<List<String>> STRING_LIST = new TypeReference<List<String>>() {
+        // 保留 List<String> 的泛型信息
     };
 
     @Override
+    @SuppressWarnings("unused")
     public void setParameter(PreparedStatement ps, int i, List<String> parameter, JdbcType jdbcType)
             throws SQLException {
         if (parameter == null || parameter.isEmpty()) {
@@ -48,6 +50,7 @@ public class ImageUrlsTypeHandler implements TypeHandler<List<String>> {
         return parse(cs.getString(columnIndex));
     }
 
+    @SuppressWarnings("unused")
     public static List<String> parse(String raw) {
         List<String> urls = new ArrayList<>();
         if (raw == null || raw.trim().isEmpty()) {
@@ -63,7 +66,7 @@ public class ImageUrlsTypeHandler implements TypeHandler<List<String>> {
                     }
                 }
                 return urls;
-            } catch (Exception ignored) {
+            } catch (Exception e) {
                 urls.clear();
             }
         }

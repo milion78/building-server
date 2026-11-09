@@ -16,6 +16,8 @@ public interface PicInfoMapper {
 
   List<PicInfo> listPicInfoByRelicId(@Param("relicId") Long relicId);
 
+  List<PicInfo> listPicInfoByRelicIdAndType(@Param("relicId") Long relicId, @Param("type") String type);
+
   List<PicInfo> listPicInfoByRelicTypeAfter(@Param("relicId") Long relicId,
                                             @Param("type") String type,
                                             @Param("updateTime") Date updateTime);

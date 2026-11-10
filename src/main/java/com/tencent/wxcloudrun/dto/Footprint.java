@@ -11,6 +11,7 @@ public class Footprint {
     private String userhead;
 
     private Date actionTime;
+    
 
     private List<String> imgUrl = new ArrayList<>();
 

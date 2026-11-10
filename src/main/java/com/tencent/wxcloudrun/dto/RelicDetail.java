@@ -48,5 +48,10 @@ public class RelicDetail implements Serializable {
   
   private String batch;
 
+  /**
+   * 是否在现场。1 表示在现场，0 表示不在。
+   */
+  private Integer onSite = 0;
+
   private List<Footprint> footprints = new ArrayList<>();
 }

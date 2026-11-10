@@ -2,6 +2,7 @@ package com.tencent.wxcloudrun.controller;
 
 import com.tencent.wxcloudrun.common.ResponseResult;
 import com.tencent.wxcloudrun.dto.RelicDetail;
+import com.tencent.wxcloudrun.dto.RelicFootprintInfo;
 import com.tencent.wxcloudrun.service.RelicService;
 import com.tencent.wxcloudrun.service.entity.RelicInfoService;
 import com.tencent.wxcloudrun.util.IdCodeUtil;
@@ -50,6 +51,25 @@ public class RelicController {
         return relicInfoService.getRelicInfo(id)
                 .map(relic -> ResponseResult.success(relicService.toRelicDetail(relic)))
                 .orElseGet(() -> ResponseResult.success(new RelicDetail()));
+    }
+
+    /**
+     * 按 code 查询文保足迹汇总。
+     * 接口地址: POST /relic/getMoreFootprint
+     * count：listFootprints 结果按 username 去重后的用户数
+     * yearList：足迹 actionTime 年份，从大到小
+     *
+     * @param code 文保 code
+     * @return 足迹汇总；code 无效时返回空汇总
+     */
+    @PostMapping("/getRelicFootprintInfo")
+    public ResponseResult<RelicFootprintInfo> getMoreFootprint(@RequestParam(required = false) String code) {
+        logger.info("/relic/getMoreFootprint post request, code: {}", code);
+        Long id = IdCodeUtil.toId(code);
+        if (id == null) {
+            return ResponseResult.success(new RelicFootprintInfo());
+        }
+        return ResponseResult.success(relicService.getFootprintInfo(id));
     }
 
     /**

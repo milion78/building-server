@@ -1,5 +1,7 @@
 package com.tencent.wxcloudrun.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tencent.wxcloudrun.dto.RelicDetail;
 import com.tencent.wxcloudrun.model.PicInfo;
 import com.tencent.wxcloudrun.model.RelicInfo;
@@ -22,6 +24,8 @@ import java.util.List;
 public class RelicService {
 
     private static final String GALLERY_TYPE = "Gallery";
+
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private final FileService fileService;
     private final PicInfoService picInfoService;
@@ -54,11 +58,34 @@ public class RelicService {
         Long relicId = relic.getId();
         BeanUtils.copyProperties(update, detail);
         detail.setId(relicId);
+        detail.setEra(update.getEra());
+        detail.setBatch(readBatch(update.getRelic()));
         if (update.getCoverImage() != null && !update.getCoverImage().trim().isEmpty()) {
             detail.setCoverImage(fileService.getFileIdByUrl(update.getCoverImage()));
         }
         detail.setImageUrls(listGalleryFileIds(relic.getSourceId()));
         return detail;
+    }
+
+    /**
+     * 从 relic JSON 读取 $.batch。字段缺失或内容不是 JSON 时返回 null。
+     */
+    private String readBatch(String relicJson) {
+        if (relicJson == null || relicJson.trim().isEmpty()) {
+            return null;
+        }
+        try {
+            JsonNode batch = OBJECT_MAPPER.readTree(relicJson).path("batch");
+            if (batch.isMissingNode() || batch.isNull()) {
+                return null;
+            }
+            if (batch.isValueNode()) {
+                return batch.asText();
+            }
+            return batch.toString();
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private RelicInfoUpdate findUpdate(Long sourceId) {

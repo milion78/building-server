@@ -44,5 +44,9 @@ public class RelicDetail implements Serializable {
 
   private Date updateTime;
 
+  private String era;
+  
+  private String batch;
+
   private List<Footprint> footprints = new ArrayList<>();
 }

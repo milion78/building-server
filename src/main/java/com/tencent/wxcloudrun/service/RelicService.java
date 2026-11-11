@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -69,11 +70,9 @@ public class RelicService {
             return detail;
         }
         BeanUtils.copyProperties(relic, detail);
-        List<PicInfo> footprintPics = listFootprintPics(relic);
         RelicInfoUpdate update = findUpdate(relic.getSourceId());
         if (update == null) {
             detail.setImageUrls(toImageFileIds(relic.getImageUrls()));
-            detail.setOnSite(resolveOnSite(relic, footprintPics));
             return detail;
         }
         Long relicId = relic.getId();
@@ -85,7 +84,7 @@ public class RelicService {
             detail.setCoverImage(fileService.getThumbFileIdByUrl(update.getCoverImage()));
         }
         detail.setImageUrls(listGalleryFileIds(relic.getSourceId()));
-        detail.setOnSite(resolveOnSite(relic, footprintPics));
+        detail.setFootprints(aggregateFootprints(relic, listFootprintPics(relic)));
         return detail;
     }
 
@@ -113,18 +112,20 @@ public class RelicService {
         if (relic == null) {
             return new ArrayList<Footprint>();
         }
-        return aggregateFootprints(listFootprintPics(relic));
+        return aggregateFootprints(relic, listFootprintPics(relic));
     }
 
     /**
      * 按 username 和 userhead 聚合。同一组的照片 url 放入同一个 imgUrl，
      * actionTime 为该组 updateTime 的平均值。
+     * 组内任一照片坐标落在文保点范围内，则 onSite 为 1。
      */
-    private List<Footprint> aggregateFootprints(List<PicInfo> pics) {
+    private List<Footprint> aggregateFootprints(RelicInfo relic, List<PicInfo> pics) {
         if (pics == null || pics.isEmpty()) {
             return new ArrayList<Footprint>();
         }
         Map<String, Footprint> grouped = new LinkedHashMap<String, Footprint>();
+        Map<String, List<PicInfo>> groupedPics = new LinkedHashMap<String, List<PicInfo>>();
         Map<String, long[]> timeStats = new LinkedHashMap<String, long[]>();
         for (PicInfo pic : pics) {
             if (pic == null) {
@@ -139,8 +140,10 @@ public class RelicService {
                 footprint.setUsername(username.isEmpty() ? null : username);
                 footprint.setUserhead(userhead);
                 grouped.put(key, footprint);
+                groupedPics.put(key, new ArrayList<PicInfo>());
                 timeStats.put(key, new long[] {0L, 0L});
             }
+            groupedPics.get(key).add(pic);
             String fileId = toImageFileId(pic.getUrl());
             if (fileId != null) {
                 footprint.getImgUrl().add(fileId);
@@ -153,12 +156,16 @@ public class RelicService {
         }
         List<Footprint> footprints = new ArrayList<Footprint>();
         for (Map.Entry<String, Footprint> entry : grouped.entrySet()) {
+            Footprint footprint = entry.getValue();
             long[] stats = timeStats.get(entry.getKey());
             if (stats[1] > 0L) {
-                entry.getValue().setActionTime(new Date(stats[0] / stats[1]));
+                footprint.setActionTime(new Date(stats[0] / stats[1]));
             }
-            footprints.add(entry.getValue());
+            footprint.setOnSite(resolveOnSite(relic, groupedPics.get(entry.getKey())));
+            footprints.add(footprint);
         }
+        footprints.sort(Comparator.comparing(Footprint::getActionTime,
+                Comparator.nullsLast(Comparator.reverseOrder())));
         return footprints;
     }
 
@@ -267,7 +274,7 @@ public class RelicService {
     }
 
     /**
-     * 有足迹照片落在文保点 500 米内则为 1，否则为 0。
+     * 这组照片里有一张落在文保点 500 米内则为 1，否则为 0。
      * pics 由调用方传入，避免同一次请求重复查询。
      */
     private int resolveOnSite(RelicInfo relic, List<PicInfo> pics) {

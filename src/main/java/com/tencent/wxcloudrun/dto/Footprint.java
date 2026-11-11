@@ -11,7 +11,11 @@ public class Footprint {
     private String userhead;
 
     private Date actionTime;
-    
+
+    /**
+     * 是否在现场。1 表示在现场，0 表示不在。
+     */
+    private Integer onSite = 0;
 
     private List<String> imgUrl = new ArrayList<>();
 
@@ -37,6 +41,14 @@ public class Footprint {
 
     public void setActionTime(Date actionTime) {
         this.actionTime = actionTime;
+    }
+
+    public Integer getOnSite() {
+        return onSite;
+    }
+
+    public void setOnSite(Integer onSite) {
+        this.onSite = onSite;
     }
 
     public List<String> getImgUrl() {

@@ -90,38 +90,69 @@ public class RelicService {
      * 查不到时，使用文保记录自身的 imageUrls。
      */
     public RelicDetail toRelicDetail(RelicInfo relic) {
+        long started = System.nanoTime();
         RelicDetail detail = new RelicDetail();
         if (relic == null) {
             return detail;
         }
+        Long relicId = relic.getId();
+        logger.info("[timing] toRelicDetail start, relicId={}, sourceId={}", relicId, relic.getSourceId());
         BeanUtils.copyProperties(relic, detail);
+        long step = System.nanoTime();
         RelicInfoUpdate update = findUpdate(relic.getSourceId());
+        logger.info("[timing] toRelicDetail findUpdate, relicId={}, found={}, costMs={}",
+                relicId, update != null, elapsedMs(step));
         if (update == null) {
+            step = System.nanoTime();
             detail.setImageUrls(toImageFileIds(relic.getImageUrls()));
-            detail.setFootprints(aggregateFootprints(relic, listFootprintPics(relic)));
+            logger.info("[timing] toRelicDetail imageUrlsFromRelic, relicId={}, size={}, costMs={}",
+                    relicId, detail.getImageUrls().size(), elapsedMs(step));
+            fillDetailFootprints(detail, relic);
+            logger.info("[timing] toRelicDetail end, relicId={}, branch=relic, costMs={}",
+                    relicId, elapsedMs(started));
             return detail;
         }
-        Long relicId = relic.getId();
         BeanUtils.copyProperties(update, detail);
         detail.setId(relicId);
         detail.setEra(update.getEra());
         detail.setBatch(readBatch(update.getRelic()));
         if (update.getCoverImage() != null && !update.getCoverImage().trim().isEmpty()) {
+            step = System.nanoTime();
             detail.setCoverImage(fileService.getThumbFileIdByUrl(update.getCoverImage()));
+            logger.info("[timing] toRelicDetail coverThumb, relicId={}, costMs={}", relicId, elapsedMs(step));
         }
+        step = System.nanoTime();
         detail.setImageUrls(listGalleryFileIds(relic.getSourceId()));
-        detail.setFootprints(aggregateFootprints(relic, listFootprintPics(relic)));
+        logger.info("[timing] toRelicDetail gallery, relicId={}, sourceId={}, size={}, costMs={}",
+                relicId, relic.getSourceId(), detail.getImageUrls().size(), elapsedMs(step));
+        fillDetailFootprints(detail, relic);
+        logger.info("[timing] toRelicDetail end, relicId={}, branch=update, costMs={}",
+                relicId, elapsedMs(started));
         return detail;
+    }
+
+    private void fillDetailFootprints(RelicDetail detail, RelicInfo relic) {
+        long step = System.nanoTime();
+        List<PicInfo> footprintPics = listFootprintPics(relic);
+        logger.info("[timing] toRelicDetail listFootprintPics, relicId={}, size={}, costMs={}",
+                relic.getId(), footprintPics.size(), elapsedMs(step));
+        step = System.nanoTime();
+        detail.setFootprints(aggregateFootprints(relic, footprintPics));
+        logger.info("[timing] toRelicDetail aggregateFootprints, relicId={}, size={}, costMs={}",
+                relic.getId(), detail.getFootprints().size(), elapsedMs(step));
     }
 
     /**
      * 查询文保足迹汇总：去重用户数 + 年份列表（从大到小）。
      */
     public RelicFootprintInfo getFootprintInfo(Long relicId) {
+        long started = System.nanoTime();
         RelicFootprintInfo info = new RelicFootprintInfo();
         List<Footprint> footprints = listFootprints(relicId);
         info.setCount(countDistinctUsernames(footprints));
         info.setYearList(listFootprintYearsDesc(footprints));
+        logger.info("[timing] getFootprintInfo, relicId={}, footprintSize={}, count={}, costMs={}",
+                relicId, footprints.size(), info.getCount(), elapsedMs(started));
         return info;
     }
 
@@ -131,14 +162,26 @@ public class RelicService {
      * 相同 username、userhead 合并为一条，imgUrl 收集全部照片，actionTime 取 picTime 的平均值。
      */
     public List<Footprint> listFootprints(Long relicId) {
+        long started = System.nanoTime();
         if (relicId == null) {
             return new ArrayList<Footprint>();
         }
+        long step = System.nanoTime();
         RelicInfo relic = relicInfoService.getRelicInfo(relicId).orElse(null);
+        logger.info("[timing] listFootprints getRelicInfo, relicId={}, found={}, costMs={}",
+                relicId, relic != null, elapsedMs(step));
         if (relic == null) {
             return new ArrayList<Footprint>();
         }
-        return aggregateFootprints(relic, listFootprintPics(relic));
+        step = System.nanoTime();
+        List<PicInfo> pics = listFootprintPics(relic);
+        logger.info("[timing] listFootprints listFootprintPics, relicId={}, sourceId={}, size={}, costMs={}",
+                relicId, relic.getSourceId(), pics.size(), elapsedMs(step));
+        step = System.nanoTime();
+        List<Footprint> footprints = aggregateFootprints(relic, pics);
+        logger.info("[timing] listFootprints aggregateFootprints, relicId={}, size={}, costMs={}, totalMs={}",
+                relicId, footprints.size(), elapsedMs(step), elapsedMs(started));
+        return footprints;
     }
 
     /**
@@ -153,12 +196,20 @@ public class RelicService {
         Map<String, Footprint> grouped = new LinkedHashMap<String, Footprint>();
         Map<String, List<PicInfo>> groupedPics = new LinkedHashMap<String, List<PicInfo>>();
         Map<String, long[]> timeStats = new LinkedHashMap<String, long[]>();
+        long started = System.nanoTime();
+        long headMs = 0L;
+        long imageMs = 0L;
+        int headCount = 0;
+        int imageCount = 0;
         for (PicInfo pic : pics) {
             if (pic == null) {
                 continue;
             }
             String username = pic.getUseeNickname() == null ? "" : pic.getUseeNickname().trim();
+            long step = System.nanoTime();
             String userhead = toUserheadFileId(pic.getUserHeadUrl());
+            headMs += elapsedMs(step);
+            headCount++;
             String key = username + "\u0000" + (userhead == null ? "" : userhead);
             Footprint footprint = grouped.get(key);
             if (footprint == null) {
@@ -170,7 +221,10 @@ public class RelicService {
                 timeStats.put(key, new long[] {0L, 0L});
             }
             groupedPics.get(key).add(pic);
+            long imageStep = System.nanoTime();
             String fileId = toImageFileId(pic.getUrl());
+            imageMs += elapsedMs(imageStep);
+            imageCount++;
             if (fileId != null) {
                 footprint.getImgUrl().add(fileId);
             }
@@ -191,8 +245,16 @@ public class RelicService {
             footprint.setOnSite(resolveOnSite(relic, groupedPics.get(entry.getKey())));
             footprints.add(footprint);
         }
+        long sortStep = System.nanoTime();
         Collections.sort(footprints);
+        logger.info("[timing] aggregateFootprints, relicId={}, picSize={}, footprintSize={}, headCount={}, headMs={}, imageCount={}, imageMs={}, sortMs={}, costMs={}",
+                relic == null ? null : relic.getId(), pics.size(), footprints.size(),
+                headCount, headMs, imageCount, imageMs, elapsedMs(sortStep), elapsedMs(started));
         return footprints;
+    }
+
+    private static long elapsedMs(long startedNanos) {
+        return (System.nanoTime() - startedNanos) / 1000000L;
     }
 
     /**
@@ -406,27 +468,38 @@ public class RelicService {
     }
 
     private List<String> toImageFileIds(String imageUrls) {
+        long started = System.nanoTime();
+        List<String> urls = ImageUrlsTypeHandler.parse(imageUrls);
         List<String> fileIds = new ArrayList<>();
-        for (String url : ImageUrlsTypeHandler.parse(imageUrls)) {
+        for (String url : urls) {
             String fileId = fileService.getThumbFileIdByUrl(url);
             if (fileId != null && !fileId.trim().isEmpty()) {
                 fileIds.add(fileId);
             }
         }
+        logger.info("[timing] toImageFileIds, urlSize={}, fileSize={}, costMs={}",
+                urls.size(), fileIds.size(), elapsedMs(started));
         return fileIds;
     }
 
     private List<String> listGalleryFileIds(Long relicId) {
+        long started = System.nanoTime();
         List<String> fileIds = new ArrayList<>();
         if (relicId == null) {
             return fileIds;
         }
-        for (PicInfo pic : picInfoService.listPicInfoByRelicIdAndType(relicId, GALLERY_TYPE)) {
-            String fileId = fileService.getThumbFileIdByUrl(pic.getUrl());
-            if (fileId != null && !fileId.trim().isEmpty()) {
-                fileIds.add(fileId);
+        List<PicInfo> pics = picInfoService.listPicInfoByRelicIdAndType(relicId, GALLERY_TYPE);
+        long convertStarted = System.nanoTime();
+        if (pics != null) {
+            for (PicInfo pic : pics) {
+                String fileId = fileService.getThumbFileIdByUrl(pic.getUrl());
+                if (fileId != null && !fileId.trim().isEmpty()) {
+                    fileIds.add(fileId);
+                }
             }
         }
+        logger.info("[timing] listGalleryFileIds, relicId={}, picSize={}, fileSize={}, convertMs={}, costMs={}",
+                relicId, pics == null ? 0 : pics.size(), fileIds.size(), elapsedMs(convertStarted), elapsedMs(started));
         return fileIds;
     }
 }

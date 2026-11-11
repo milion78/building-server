@@ -42,15 +42,32 @@ public class RelicController {
      */
     @PostMapping("/getById")
     public ResponseResult<RelicDetail> getRelicInfoById(@RequestParam(required = false) String code) {
-        logger.info("/relic/getById post request, code: {}", code);
-        Long id = IdCodeUtil.toId(code);
-        if (id == null) {
-            return ResponseResult.success(new RelicDetail());
+        long started = System.nanoTime();
+        logger.info("[timing] /relic/getById start, code={}", code);
+        try {
+            long step = System.nanoTime();
+            Long id = IdCodeUtil.toId(code);
+            logger.info("[timing] /relic/getById toId, code={}, id={}, costMs={}", code, id, elapsedMs(step));
+            if (id == null) {
+                return ResponseResult.success(new RelicDetail());
+            }
+            step = System.nanoTime();
+            int filled = relicInfoService.fillImage(id, 1);
+            logger.info("[timing] /relic/getById fillImage, id={}, updated={}, costMs={}",
+                    id, filled, elapsedMs(step));
+            step = System.nanoTime();
+            RelicDetail detail = relicInfoService.getRelicInfo(id)
+                    .map(relicService::toRelicDetail)
+                    .orElseGet(RelicDetail::new);
+            logger.info("[timing] /relic/getById getRelicInfo+toRelicDetail, id={}, footprintSize={}, imageSize={}, costMs={}",
+                    id,
+                    detail.getFootprints() == null ? 0 : detail.getFootprints().size(),
+                    detail.getImageUrls() == null ? 0 : detail.getImageUrls().size(),
+                    elapsedMs(step));
+            return ResponseResult.success(detail);
+        } finally {
+            logger.info("[timing] /relic/getById end, code={}, costMs={}", code, elapsedMs(started));
         }
-        relicInfoService.fillImage(id, 1);
-        return relicInfoService.getRelicInfo(id)
-                .map(relic -> ResponseResult.success(relicService.toRelicDetail(relic)))
-                .orElseGet(() -> ResponseResult.success(new RelicDetail()));
     }
 
     /**
@@ -64,12 +81,28 @@ public class RelicController {
      */
     @PostMapping("/getRelicFootprintInfo")
     public ResponseResult<RelicFootprintInfo> getRelicFootprintInfo(@RequestParam(required = false) String code) {
-        logger.info("/relic/getRelicFootprintInfo post request, code: {}", code);
-        Long id = IdCodeUtil.toId(code);
-        if (id == null) {
-            return ResponseResult.success(new RelicFootprintInfo());
+        long started = System.nanoTime();
+        logger.info("[timing] /relic/getRelicFootprintInfo start, code={}", code);
+        try {
+            long step = System.nanoTime();
+            Long id = IdCodeUtil.toId(code);
+            logger.info("[timing] /relic/getRelicFootprintInfo toId, code={}, id={}, costMs={}",
+                    code, id, elapsedMs(step));
+            if (id == null) {
+                return ResponseResult.success(new RelicFootprintInfo());
+            }
+            step = System.nanoTime();
+            RelicFootprintInfo info = relicService.getFootprintInfo(id);
+            logger.info("[timing] /relic/getRelicFootprintInfo getFootprintInfo, id={}, count={}, yearSize={}, costMs={}",
+                    id, info.getCount(), info.getYearList() == null ? 0 : info.getYearList().size(), elapsedMs(step));
+            return ResponseResult.success(info);
+        } finally {
+            logger.info("[timing] /relic/getRelicFootprintInfo end, code={}, costMs={}", code, elapsedMs(started));
         }
-        return ResponseResult.success(relicService.getFootprintInfo(id));
+    }
+
+    private static long elapsedMs(long startedNanos) {
+        return (System.nanoTime() - startedNanos) / 1000000L;
     }
 
     /**

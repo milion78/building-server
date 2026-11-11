@@ -3,6 +3,8 @@ package com.tencent.wxcloudrun.service.impl;
 import com.tencent.wxcloudrun.dao.RelicInfoUpdateMapper;
 import com.tencent.wxcloudrun.model.RelicInfoUpdate;
 import com.tencent.wxcloudrun.service.entity.RelicInfoUpdateService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +13,8 @@ import java.util.Optional;
 
 @Service
 public class RelicInfoUpdateServiceImpl implements RelicInfoUpdateService {
+
+  private static final Logger logger = LoggerFactory.getLogger(RelicInfoUpdateServiceImpl.class);
 
   final RelicInfoUpdateMapper relicInfoUpdateMapper;
 
@@ -25,7 +29,11 @@ public class RelicInfoUpdateServiceImpl implements RelicInfoUpdateService {
 
   @Override
   public Optional<RelicInfoUpdate> getRelicInfoUpdateBySourceId(Long sourceId) {
-    return Optional.ofNullable(relicInfoUpdateMapper.getRelicInfoUpdateBySourceId(sourceId));
+    long started = System.nanoTime();
+    RelicInfoUpdate update = relicInfoUpdateMapper.getRelicInfoUpdateBySourceId(sourceId);
+    logger.info("[timing] relic_info_update.getBySourceId, sourceId={}, found={}, costMs={}",
+        sourceId, update != null, (System.nanoTime() - started) / 1000000L);
+    return Optional.ofNullable(update);
   }
 
   @Override

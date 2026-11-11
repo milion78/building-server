@@ -3,6 +3,8 @@ package com.tencent.wxcloudrun.service.impl;
 import com.tencent.wxcloudrun.dao.PicInfoMapper;
 import com.tencent.wxcloudrun.model.PicInfo;
 import com.tencent.wxcloudrun.service.entity.PicInfoService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +14,8 @@ import java.util.Optional;
 
 @Service
 public class PicInfoServiceImpl implements PicInfoService {
+
+  private static final Logger logger = LoggerFactory.getLogger(PicInfoServiceImpl.class);
 
   final PicInfoMapper picInfoMapper;
 
@@ -36,7 +40,11 @@ public class PicInfoServiceImpl implements PicInfoService {
 
   @Override
   public List<PicInfo> listPicInfoByRelicIdAndType(Long relicId, String type) {
-    return picInfoMapper.listPicInfoByRelicIdAndType(relicId, type);
+    long started = System.nanoTime();
+    List<PicInfo> pics = picInfoMapper.listPicInfoByRelicIdAndType(relicId, type);
+    logger.info("[timing] pic_info.listByRelicIdAndType, relicId={}, type={}, size={}, costMs={}",
+        relicId, type, pics == null ? 0 : pics.size(), (System.nanoTime() - started) / 1000000L);
+    return pics;
   }
 
   @Override

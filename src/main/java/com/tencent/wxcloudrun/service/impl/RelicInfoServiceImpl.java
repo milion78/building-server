@@ -29,8 +29,13 @@ public class RelicInfoServiceImpl implements RelicInfoService {
 
   @Override
   public Optional<RelicInfo> getRelicInfo(Long id) {
+    long started = System.nanoTime();
     RelicInfo relic = relicInfoMapper.getRelicInfo(id);
+    logger.info("[timing] relic.getRelicInfo query, id={}, found={}, costMs={}",
+        id, relic != null, elapsedMs(started));
+    long coverStarted = System.nanoTime();
     fillImageFileIds(relic);
+    logger.info("[timing] relic.getRelicInfo fillCover, id={}, costMs={}", id, elapsedMs(coverStarted));
     return Optional.ofNullable(relic);
   }
 
@@ -56,12 +61,17 @@ public class RelicInfoServiceImpl implements RelicInfoService {
 
   @Override
   public int fillImage(Long id, int count) {
+    long started = System.nanoTime();
     if (id == null || count <= 0) {
       return 0;
     }
+    long step = System.nanoTime();
     List<RelicInfo> relics = relicInfoMapper.listRelicInfoFromId(id, count);
+    logger.info("[timing] relic.fillImage listFromId, id={}, count={}, size={}, costMs={}",
+        id, count, relics == null ? 0 : relics.size(), elapsedMs(step));
     int updated = 0;
     if (relics == null) {
+      logger.info("[timing] relic.fillImage done, id={}, updated=0, costMs={}", id, elapsedMs(started));
       return updated;
     }
     for (RelicInfo current : relics) {
@@ -72,7 +82,10 @@ public class RelicInfoServiceImpl implements RelicInfoService {
       if (relicName == null || relicName.trim().isEmpty()) {
         continue;
       }
+      step = System.nanoTime();
       List<RelicInfo> sameNameList = relicInfoMapper.listRelicInfoByName(relicName.trim());
+      logger.info("[timing] relic.fillImage listByName, id={}, name={}, size={}, costMs={}",
+          current.getId(), relicName, sameNameList == null ? 0 : sameNameList.size(), elapsedMs(step));
       List<String> imageUrls = new ArrayList<>();
       if (sameNameList != null) {
         for (RelicInfo other : sameNameList) {
@@ -89,12 +102,13 @@ public class RelicInfoServiceImpl implements RelicInfoService {
       if (imageUrls.isEmpty()) {
         continue;
       }
+      step = System.nanoTime();
       relicInfoMapper.updateImageUrls(current.getId(), imageUrls);
+      logger.info("[timing] relic.fillImage updateImageUrls, id={}, imageCount={}, costMs={}",
+          current.getId(), imageUrls.size(), elapsedMs(step));
       updated++;
-      logger.info("fillImage updated id={}, name={}, imageCount={}",
-          current.getId(), relicName, imageUrls.size());
     }
-    logger.info("fillImage finished, updated={}", updated);
+    logger.info("[timing] relic.fillImage done, id={}, updated={}, costMs={}", id, updated, elapsedMs(started));
     return updated;
   }
 
@@ -121,6 +135,10 @@ public class RelicInfoServiceImpl implements RelicInfoService {
   @Override
   public int deleteById(Long id) {
     return relicInfoMapper.deleteById(id);
+  }
+
+  private static long elapsedMs(long startedNanos) {
+    return (System.nanoTime() - startedNanos) / 1000000L;
   }
 
   private void fillImageFileIds(List<RelicInfo> relics) {

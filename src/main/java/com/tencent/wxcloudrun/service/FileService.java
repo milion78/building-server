@@ -65,12 +65,13 @@ public class FileService {
             logger.warn("fileId 为空，无法生成访问地址");
             return null;
         }
+        long started = System.nanoTime();
         String objectKey = toObjectKey(fileId);
         GeneratePresignedUrlRequest request = new GeneratePresignedUrlRequest(
                 bucket, objectKey, HttpMethodName.GET);
         request.setExpiration(new Date(System.currentTimeMillis() + expireSeconds * 1000L));
         String url = client().generatePresignedUrl(request).toString();
-        logger.info("FileService.getUrlByFileId - fileId: {}", objectKey);
+        logger.info("[timing] cos.signUrl, key={}, costMs={}", objectKey, elapsedMs(started));
         return url;
     }
 
@@ -145,19 +146,28 @@ public class FileService {
             fileName = fileName.substring(0, dot);
         }
         String fileId = THUMB_FILE_ID_PREFIX + fileName + ".jpg";
-        if (!thumbExists(fileId)) {
-            logger.info("FileService.getThumbFileIdByUrl - 缩略图不存在，使用原图: {}", fileId);
+        long started = System.nanoTime();
+        boolean exists = thumbExists(fileId);
+        long costMs = elapsedMs(started);
+        if (!exists) {
+            logger.info("[timing] cos.thumb miss, key={}, costMs={}", toObjectKey(fileId), costMs);
             return getFileIdByUrl(url);
         }
-        logger.info("FileService.getThumbFileIdByUrl - fileId: {}", fileId);
+        logger.info("[timing] cos.thumb hit, key={}, costMs={}", toObjectKey(fileId), costMs);
         return fileId;
     }
 
     private boolean thumbExists(String fileId) {
+        long started = System.nanoTime();
+        String objectKey = toObjectKey(fileId);
         try {
-            return client().doesObjectExist(bucket, toObjectKey(fileId));
+            boolean exists = client().doesObjectExist(bucket, objectKey);
+            logger.info("[timing] cos.doesObjectExist, key={}, exists={}, costMs={}",
+                    objectKey, exists, elapsedMs(started));
+            return exists;
         } catch (Exception e) {
-            logger.warn("检查缩略图是否存在失败: {}", fileId, e);
+            logger.warn("[timing] cos.doesObjectExist failed, key={}, costMs={}",
+                    objectKey, elapsedMs(started), e);
             return false;
         }
     }
@@ -188,12 +198,19 @@ public class FileService {
         }
         synchronized (this) {
             if (cosClient == null) {
+                long started = System.nanoTime();
                 COSCredentials credentials = new BasicCOSCredentials(secretId, secretKey);
                 ClientConfig clientConfig = new ClientConfig(new Region(region));
                 cosClient = new COSClient(credentials, clientConfig);
+                logger.info("[timing] cos.client init, region={}, bucket={}, costMs={}",
+                        region, bucket, elapsedMs(started));
             }
         }
         return cosClient;
+    }
+
+    private static long elapsedMs(long startedNanos) {
+        return (System.nanoTime() - startedNanos) / 1000000L;
     }
 
     @PreDestroy

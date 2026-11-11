@@ -12,6 +12,8 @@ import com.tencent.wxcloudrun.service.entity.PicInfoService;
 import com.tencent.wxcloudrun.service.entity.RelicInfoService;
 import com.tencent.wxcloudrun.service.entity.RelicInfoUpdateService;
 import com.tencent.wxcloudrun.typehandler.ImageUrlsTypeHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,6 +39,8 @@ import java.util.TreeSet;
 @Service
 public class RelicService {
 
+    private static final Logger logger = LoggerFactory.getLogger(RelicService.class);
+
     private static final String GALLERY_TYPE = "Gallery";
 
     private static final String FOOTPRINT_TYPE = "Footprint";
@@ -46,12 +50,19 @@ public class RelicService {
 
     private static final String[] PIC_TIME_PATTERNS = {
             "yyyy-MM-dd HH:mm:ss",
-            "yyyy-MM-dd HH:mm:ss.SSS",
-            "yyyy-MM-dd'T'HH:mm:ss",
-            "yyyy-MM-dd'T'HH:mm:ss.SSS",
-            "yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
+            "yyyy-MM-dd HH:mm",
             "yyyy/MM/dd HH:mm:ss",
-            "yyyy-MM-dd"
+            "yyyy/MM/dd HH:mm",
+            "yyyy.MM.dd HH:mm:ss",
+            "yyyy.MM.dd HH:mm",
+            "yyyy-MM-dd",
+            "yyyy/MM/dd",
+            "yyyy.MM.dd",
+            "yyyy-MM",
+            "yyyy/MM",
+            "yyyyMMddHHmmss",
+            "yyyyMMdd",
+            "yyyy"
     };
 
     private static final TimeZone PIC_TIME_ZONE = TimeZone.getTimeZone("GMT+8");
@@ -186,14 +197,19 @@ public class RelicService {
 
     /**
      * 把 pic_time 字符串按东八区解析成日期。无法识别时返回 null。
+     * 小数秒和时区后缀会先去掉，例如 2026-11-06 16:16:40.0。
      */
     private Date parsePicTime(String picTime) {
         if (picTime == null) {
             return null;
         }
-        String text = picTime.trim();
+        String text = normalizePicTime(picTime);
         if (text.isEmpty()) {
             return null;
+        }
+        if (isAllDigits(text) && (text.length() == 10 || text.length() == 13)) {
+            long value = Long.parseLong(text);
+            return new Date(text.length() == 13 ? value : value * 1000L);
         }
         for (String pattern : PIC_TIME_PATTERNS) {
             SimpleDateFormat format = new SimpleDateFormat(pattern);
@@ -205,7 +221,44 @@ public class RelicService {
                 return date;
             }
         }
+        logger.warn("picTime 无法解析: {}", picTime);
         return null;
+    }
+
+    private static String normalizePicTime(String picTime) {
+        String text = picTime.trim();
+        if (text.isEmpty()) {
+            return text;
+        }
+        text = text.replace('T', ' ').replace('年', '-').replace('月', '-').replace('日', ' ');
+        text = text.replace("时", ":").replace("分", ":").replace("秒", "");
+        text = text.replaceAll("\\s+", " ").trim();
+        if (text.endsWith("Z")) {
+            text = text.substring(0, text.length() - 1).trim();
+        }
+        int zone = text.indexOf('+', 10);
+        if (zone < 0) {
+            int space = text.indexOf(' ');
+            zone = space > 0 ? text.indexOf('-', space) : -1;
+        }
+        if (zone > 0) {
+            text = text.substring(0, zone).trim();
+        }
+        int colon = text.lastIndexOf(':');
+        int dot = text.lastIndexOf('.');
+        if (colon > 0 && dot > colon) {
+            text = text.substring(0, dot);
+        }
+        return text;
+    }
+
+    private static boolean isAllDigits(String text) {
+        for (int i = 0; i < text.length(); i++) {
+            if (!Character.isDigit(text.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private String toUserheadFileId(String userHeadUrl) {

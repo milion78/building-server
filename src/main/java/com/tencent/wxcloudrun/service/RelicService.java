@@ -16,16 +16,18 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.TreeSet;
 
 /**
@@ -41,6 +43,18 @@ public class RelicService {
 
     /** 足迹照片与文保点距离不超过该值，视为在现场 */
     private static final double ON_SITE_METERS = 500d;
+
+    private static final String[] PIC_TIME_PATTERNS = {
+            "yyyy-MM-dd HH:mm:ss",
+            "yyyy-MM-dd HH:mm:ss.SSS",
+            "yyyy-MM-dd'T'HH:mm:ss",
+            "yyyy-MM-dd'T'HH:mm:ss.SSS",
+            "yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
+            "yyyy/MM/dd HH:mm:ss",
+            "yyyy-MM-dd"
+    };
+
+    private static final TimeZone PIC_TIME_ZONE = TimeZone.getTimeZone("GMT+8");
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
@@ -103,7 +117,7 @@ public class RelicService {
     /**
      * 查询文保足迹。图片按 sourceId 查 pic_info 中 type 为 Footprint 的记录。
      * 没有 sourceId 时用文保 id。头像和照片转成云存储 fileId。
-     * 相同 username、userhead 合并为一条，imgUrl 收集全部照片，actionTime 取更新时间的平均值。
+     * 相同 username、userhead 合并为一条，imgUrl 收集全部照片，actionTime 取 picTime 的平均值。
      */
     public List<Footprint> listFootprints(Long relicId) {
         if (relicId == null) {
@@ -118,7 +132,7 @@ public class RelicService {
 
     /**
      * 按 username 和 userhead 聚合。同一组的照片 url 放入同一个 imgUrl，
-     * actionTime 为该组 updateTime 的平均值。
+     * actionTime 为该组 picTime 解析后的平均值。
      * 组内任一照片坐标落在文保点范围内，则 onSite 为 1。
      */
     private List<Footprint> aggregateFootprints(RelicInfo relic, List<PicInfo> pics) {
@@ -149,9 +163,10 @@ public class RelicService {
             if (fileId != null) {
                 footprint.getImgUrl().add(fileId);
             }
-            if (pic.getUpdateTime() != null) {
+            Date picTime = parsePicTime(pic.getPicTime());
+            if (picTime != null) {
                 long[] stats = timeStats.get(key);
-                stats[0] += pic.getUpdateTime().getTime();
+                stats[0] += picTime.getTime();
                 stats[1] += 1L;
             }
         }
@@ -165,9 +180,32 @@ public class RelicService {
             footprint.setOnSite(resolveOnSite(relic, groupedPics.get(entry.getKey())));
             footprints.add(footprint);
         }
-        footprints.sort(Comparator.comparing(Footprint::getActionTime,
-                Comparator.nullsLast(Comparator.reverseOrder())));
+        Collections.sort(footprints);
         return footprints;
+    }
+
+    /**
+     * 把 pic_time 字符串按东八区解析成日期。无法识别时返回 null。
+     */
+    private Date parsePicTime(String picTime) {
+        if (picTime == null) {
+            return null;
+        }
+        String text = picTime.trim();
+        if (text.isEmpty()) {
+            return null;
+        }
+        for (String pattern : PIC_TIME_PATTERNS) {
+            SimpleDateFormat format = new SimpleDateFormat(pattern);
+            format.setLenient(false);
+            format.setTimeZone(PIC_TIME_ZONE);
+            ParsePosition position = new ParsePosition(0);
+            Date date = format.parse(text, position);
+            if (date != null && position.getIndex() == text.length()) {
+                return date;
+            }
+        }
+        return null;
     }
 
     private String toUserheadFileId(String userHeadUrl) {

@@ -138,7 +138,7 @@ public class RelicInfoServiceImpl implements RelicInfoService {
     }
     String coverImage = relic.getCoverImage();
     if (coverImage != null && !coverImage.trim().isEmpty()) {
-      relic.setCoverImage(fileService.getFileIdByUrl(coverImage));
+      relic.setCoverImage(fileService.getThumbFileIdByUrl(coverImage));
     }
   }
 }

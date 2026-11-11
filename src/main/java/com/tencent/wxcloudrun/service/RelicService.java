@@ -82,7 +82,7 @@ public class RelicService {
         detail.setEra(update.getEra());
         detail.setBatch(readBatch(update.getRelic()));
         if (update.getCoverImage() != null && !update.getCoverImage().trim().isEmpty()) {
-            detail.setCoverImage(fileService.getFileIdByUrl(update.getCoverImage()));
+            detail.setCoverImage(fileService.getThumbFileIdByUrl(update.getCoverImage()));
         }
         detail.setImageUrls(listGalleryFileIds(relic.getSourceId()));
         detail.setOnSite(resolveOnSite(relic, footprintPics));
@@ -166,7 +166,7 @@ public class RelicService {
         if (userHeadUrl == null || userHeadUrl.trim().isEmpty()) {
             return null;
         }
-        String fileId = fileService.getFileIdByUrl(userHeadUrl.trim());
+        String fileId = fileService.getThumbFileIdByUrl(userHeadUrl.trim());
         if (fileId == null || fileId.trim().isEmpty()) {
             return null;
         }
@@ -177,7 +177,7 @@ public class RelicService {
         if (url == null || url.trim().isEmpty()) {
             return null;
         }
-        String fileId = fileService.getFileIdByUrl(url);
+        String fileId = fileService.getThumbFileIdByUrl(url);
         if (fileId == null || fileId.trim().isEmpty()) {
             return null;
         }
@@ -309,7 +309,7 @@ public class RelicService {
     private List<String> toImageFileIds(String imageUrls) {
         List<String> fileIds = new ArrayList<>();
         for (String url : ImageUrlsTypeHandler.parse(imageUrls)) {
-            String fileId = fileService.getFileIdByUrl(url);
+            String fileId = fileService.getThumbFileIdByUrl(url);
             if (fileId != null && !fileId.trim().isEmpty()) {
                 fileIds.add(fileId);
             }
@@ -323,7 +323,7 @@ public class RelicService {
             return fileIds;
         }
         for (PicInfo pic : picInfoService.listPicInfoByRelicIdAndType(relicId, GALLERY_TYPE)) {
-            String fileId = fileService.getFileIdByUrl(pic.getUrl());
+            String fileId = fileService.getThumbFileIdByUrl(pic.getUrl());
             if (fileId != null && !fileId.trim().isEmpty()) {
                 fileIds.add(fileId);
             }

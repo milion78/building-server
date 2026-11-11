@@ -55,7 +55,7 @@ public class RelicController {
 
     /**
      * 按 code 查询文保足迹汇总。
-     * 接口地址: POST /relic/getMoreFootprint
+     * 接口地址: POST /relic/getRelicFootprintInfo
      * count：listFootprints 结果按 username 去重后的用户数
      * yearList：足迹 actionTime 年份，从大到小
      *
@@ -63,8 +63,8 @@ public class RelicController {
      * @return 足迹汇总；code 无效时返回空汇总
      */
     @PostMapping("/getRelicFootprintInfo")
-    public ResponseResult<RelicFootprintInfo> getMoreFootprint(@RequestParam(required = false) String code) {
-        logger.info("/relic/getMoreFootprint post request, code: {}", code);
+    public ResponseResult<RelicFootprintInfo> getRelicFootprintInfo(@RequestParam(required = false) String code) {
+        logger.info("/relic/getRelicFootprintInfo post request, code: {}", code);
         Long id = IdCodeUtil.toId(code);
         if (id == null) {
             return ResponseResult.success(new RelicFootprintInfo());

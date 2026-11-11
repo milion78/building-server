@@ -64,7 +64,7 @@ public class MapService {
             point.setId(IdCodeUtil.toCode(relic.getId()));
             point.setName(relic.getRelicName());
             point.setCoordinate(coordinate);
-            String fileId = fileService.getFileIdByUrl(relic.getCoverImage());
+            String fileId = fileService.getThumbFileIdByUrl(relic.getCoverImage());
             point.setPicCloudId(fileId);
             point.setPicUrl(fileService.getUrlByFileId(fileId));
             point.setRelicRank(relic.getRelicRank());

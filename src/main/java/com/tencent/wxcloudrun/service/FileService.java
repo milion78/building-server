@@ -31,6 +31,9 @@ public class FileService {
     private static final String FILE_ID_PREFIX =
             "cloud://prod-8gmyadj42ce90ec4.7072-prod-8gmyadj42ce90ec4-1387541623/pic/";
 
+    private static final String THUMB_FILE_ID_PREFIX =
+            "cloud://prod-8gmyadj42ce90ec4.7072-prod-8gmyadj42ce90ec4-1387541623/pic_thumb/";
+
     private final String secretId;
     private final String secretKey;
     private final String region;
@@ -104,6 +107,59 @@ public class FileService {
         String fileId = FILE_ID_PREFIX + fileName;
         logger.info("FileService.getFileIdByUrl - fileId: {}", fileId);
         return fileId;
+    }
+
+    /**
+     * 把外部图片地址换成缩略图 fileId。
+     * 文件名与原图相同，后缀统一为 jpg，目录为 pic_thumb。
+     * 桶里没有对应的 pic_thumb 文件时，返回原图 fileId。
+     *
+     * @param url 例如 https://sinorelic.oss-cn-hangzhou.aliyuncs.com/upload/202209/308b5572-b314-4025-8e0e-0cc431838ca9.jpg
+     * @return cloud://prod-8gmyadj42ce90ec4.7072-prod-8gmyadj42ce90ec4-1387541623/pic_thumb/308b5572-b314-4025-8e0e-0cc431838ca9.jpg
+     */
+    public String getThumbFileIdByUrl(String url) {
+        if (url == null || url.trim().isEmpty()) {
+            logger.warn("url 为空，无法换成缩略图 fileId");
+            return null;
+        }
+        if (!url.trim().startsWith(SOURCE_URL_PREFIX)) {
+            return url;
+        }
+        String path = url.trim();
+        int query = path.indexOf('?');
+        if (query >= 0) {
+            path = path.substring(0, query);
+        }
+        int fragment = path.indexOf('#');
+        if (fragment >= 0) {
+            path = path.substring(0, fragment);
+        }
+        int slash = path.lastIndexOf('/');
+        String fileName = slash >= 0 ? path.substring(slash + 1) : path;
+        if (fileName.isEmpty()) {
+            logger.warn("url 中没有文件名: {}", url);
+            return null;
+        }
+        int dot = fileName.lastIndexOf('.');
+        if (dot > 0) {
+            fileName = fileName.substring(0, dot);
+        }
+        String fileId = THUMB_FILE_ID_PREFIX + fileName + ".jpg";
+        if (!thumbExists(fileId)) {
+            logger.info("FileService.getThumbFileIdByUrl - 缩略图不存在，使用原图: {}", fileId);
+            return getFileIdByUrl(url);
+        }
+        logger.info("FileService.getThumbFileIdByUrl - fileId: {}", fileId);
+        return fileId;
+    }
+
+    private boolean thumbExists(String fileId) {
+        try {
+            return client().doesObjectExist(bucket, toObjectKey(fileId));
+        } catch (Exception e) {
+            logger.warn("检查缩略图是否存在失败: {}", fileId, e);
+            return false;
+        }
     }
 
     /**

@@ -113,7 +113,6 @@ public class FileService {
     /**
      * 把外部图片地址换成缩略图 fileId。
      * 文件名与原图相同，后缀统一为 jpg，目录为 pic_thumb。
-     * 桶里没有对应的 pic_thumb 文件时，返回原图 fileId。
      *
      * @param url 例如 https://sinorelic.oss-cn-hangzhou.aliyuncs.com/upload/202209/308b5572-b314-4025-8e0e-0cc431838ca9.jpg
      * @return cloud://prod-8gmyadj42ce90ec4.7072-prod-8gmyadj42ce90ec4-1387541623/pic_thumb/308b5572-b314-4025-8e0e-0cc431838ca9.jpg
@@ -145,31 +144,7 @@ public class FileService {
         if (dot > 0) {
             fileName = fileName.substring(0, dot);
         }
-        String fileId = THUMB_FILE_ID_PREFIX + fileName + ".jpg";
-        long started = System.nanoTime();
-        boolean exists = thumbExists(fileId);
-        long costMs = elapsedMs(started);
-        if (!exists) {
-            logger.info("[timing] cos.thumb miss, key={}, costMs={}", toObjectKey(fileId), costMs);
-            return getFileIdByUrl(url);
-        }
-        logger.info("[timing] cos.thumb hit, key={}, costMs={}", toObjectKey(fileId), costMs);
-        return fileId;
-    }
-
-    private boolean thumbExists(String fileId) {
-        long started = System.nanoTime();
-        String objectKey = toObjectKey(fileId);
-        try {
-            boolean exists = client().doesObjectExist(bucket, objectKey);
-            logger.info("[timing] cos.doesObjectExist, key={}, exists={}, costMs={}",
-                    objectKey, exists, elapsedMs(started));
-            return exists;
-        } catch (Exception e) {
-            logger.warn("[timing] cos.doesObjectExist failed, key={}, costMs={}",
-                    objectKey, elapsedMs(started), e);
-            return false;
-        }
+        return THUMB_FILE_ID_PREFIX + fileName + ".jpg";
     }
 
     /**

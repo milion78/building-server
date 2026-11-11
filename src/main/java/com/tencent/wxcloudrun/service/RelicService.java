@@ -73,6 +73,7 @@ public class RelicService {
         RelicInfoUpdate update = findUpdate(relic.getSourceId());
         if (update == null) {
             detail.setImageUrls(toImageFileIds(relic.getImageUrls()));
+            detail.setFootprints(aggregateFootprints(relic, listFootprintPics(relic)));
             return detail;
         }
         Long relicId = relic.getId();

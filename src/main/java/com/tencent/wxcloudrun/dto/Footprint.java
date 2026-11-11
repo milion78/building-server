@@ -1,5 +1,7 @@
 package com.tencent.wxcloudrun.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -10,6 +12,10 @@ public class Footprint {
 
     private String userhead;
 
+    /**
+     * 返回格式 yyyy-MM-dd HH:mm:ss，东八区。
+     */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date actionTime;
 
     /**
